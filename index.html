@@ -185,6 +185,33 @@
             font-weight: 700;
             color: var(--sidebar-header-text);
             letter-spacing: 0.3px;
+            cursor: default;
+        }
+
+        .sidebar-title-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .sidebar-title-group h1 {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .btn-rename {
+            opacity: 0;
+            flex-shrink: 0;
+            width: 26px !important;
+            height: 26px !important;
+            font-size: 12px !important;
+        }
+
+        .sidebar-title-group:hover .btn-rename {
+            opacity: 1;
         }
 
         .header-actions {
@@ -292,6 +319,96 @@
         }
 
         .theme-option.active span { color: var(--theme-label-active); font-weight: 600; }
+
+        /* ===== 重命名弹窗 ===== */
+        .rename-popup {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 12px;
+            right: 12px;
+            background: var(--theme-popup-bg);
+            border: 1px solid var(--theme-popup-border);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 6px 24px var(--theme-popup-shadow);
+            display: none;
+            z-index: 999;
+        }
+
+        .rename-popup.show { display: block; }
+
+        .rename-popup h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--theme-label-active);
+            margin-bottom: 12px;
+        }
+
+        .rename-field {
+            margin-bottom: 10px;
+        }
+
+        .rename-field label {
+            display: block;
+            font-size: 11px;
+            color: var(--theme-label);
+            margin-bottom: 4px;
+        }
+
+        .rename-field input {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--theme-popup-border);
+            background: var(--search-bg);
+            color: var(--search-text);
+            font-size: 14px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .rename-field input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .rename-field input::placeholder {
+            color: var(--search-placeholder);
+        }
+
+        .rename-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .rename-btn {
+            flex: 1;
+            padding: 7px 0;
+            border-radius: 8px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .rename-btn.cancel {
+            background: var(--theme-option-hover);
+            color: var(--theme-label);
+        }
+
+        .rename-btn.cancel:hover {
+            background: var(--theme-popup-border);
+        }
+
+        .rename-btn.confirm {
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        .rename-btn.confirm:hover {
+            opacity: 0.9;
+        }
 
         /* ===== 搜索栏 ===== */
         .search-box {
@@ -655,7 +772,10 @@
         <!-- ===== 左侧边栏 ===== -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <h1>📌 便签本</h1>
+                <div class="sidebar-title-group">
+                    <h1 id="sidebarTitle">📌 便签本</h1>
+                    <button class="btn-icon btn-rename" id="btnRename" title="重命名">✏️</button>
+                </div>
                 <div class="header-actions">
                     <button class="btn-icon" id="btnTheme" title="主题">🎨</button>
                     <button class="btn-add" id="btnAdd" title="新建">+</button>
@@ -663,6 +783,22 @@
                 <div class="theme-popup" id="themePopup">
                     <h4>选择主题</h4>
                     <div class="theme-grid" id="themeGrid"></div>
+                </div>
+                <!-- 重命名弹窗 -->
+                <div class="rename-popup" id="renamePopup">
+                    <h4>修改笔记本名称</h4>
+                    <div class="rename-field">
+                        <label>图标（Emoji）</label>
+                        <input type="text" id="renameEmoji" maxlength="4" placeholder="📌">
+                    </div>
+                    <div class="rename-field">
+                        <label>名称</label>
+                        <input type="text" id="renameText" placeholder="便签本" maxlength="20">
+                    </div>
+                    <div class="rename-actions">
+                        <button class="rename-btn cancel" id="renameCancel">取消</button>
+                        <button class="rename-btn confirm" id="renameConfirm">确定</button>
+                    </div>
                 </div>
             </div>
 
@@ -859,7 +995,64 @@
                         updateDarkUI();
                     }
                 }
-            }, 60000); // 每分钟检查
+            }, 60000);
+        }
+
+        // ============================================================
+        //  笔记本重命名
+        // ============================================================
+        const RENAME_STORAGE_KEY = 'sticky_notes_name';
+
+        function loadRename() {
+            const saved = localStorage.getItem(RENAME_STORAGE_KEY);
+            if (saved) {
+                try {
+                    const { emoji, text } = JSON.parse(saved);
+                    applyRename(emoji || '📌', text || '便签本');
+                } catch {
+                    applyRename('📌', '便签本');
+                }
+            } else {
+                applyRename('📌', '便签本');
+            }
+        }
+
+        function applyRename(emoji, text) {
+            const full = emoji + ' ' + text;
+            const sidebarTitle = document.getElementById('sidebarTitle');
+            if (sidebarTitle) sidebarTitle.textContent = full;
+        }
+
+        function openRenamePopup() {
+            const saved = localStorage.getItem(RENAME_STORAGE_KEY);
+            let emoji = '📌', text = '便签本';
+            if (saved) {
+                try {
+                    const d = JSON.parse(saved);
+                    emoji = d.emoji || '📌';
+                    text = d.text || '便签本';
+                } catch {}
+            }
+            document.getElementById('renameEmoji').value = emoji;
+            document.getElementById('renameText').value = text;
+            document.getElementById('renamePopup').classList.add('show');
+            setTimeout(() => document.getElementById('renameEmoji').focus(), 80);
+        }
+
+        function closeRenamePopup() {
+            document.getElementById('renamePopup').classList.remove('show');
+        }
+
+        function confirmRename() {
+            let emoji = document.getElementById('renameEmoji').value.trim();
+            let text = document.getElementById('renameText').value.trim();
+            if (!emoji) emoji = '📌';
+            if (!text) text = '便签本';
+            // 确保 emoji 只保留第一个字符
+            emoji = [...emoji][0] || '📌';
+            localStorage.setItem(RENAME_STORAGE_KEY, JSON.stringify({ emoji, text }));
+            applyRename(emoji, text);
+            closeRenamePopup();
         }
 
         // ============================================================
@@ -1168,6 +1361,11 @@
                 addNote();
             }
             if (e.key === 'Escape') {
+                const rp = document.getElementById('renamePopup');
+                if (rp.classList.contains('show')) {
+                    closeRenamePopup();
+                    return;
+                }
                 closeThemePopup();
                 if (currentId) { currentId = null; render(); }
             }
@@ -1184,6 +1382,7 @@
             loadNotes();
             currentId = notes.length ? notes[0].id : null;
             loadSidebarWidth();
+            loadRename();
             render();
             renderThemeGrid();
 
@@ -1199,12 +1398,34 @@
                 if (btn) setTheme(btn.dataset.theme);
             });
 
+            // 重命名
+            document.getElementById('btnRename').addEventListener('click', e => {
+                e.stopPropagation();
+                openRenamePopup();
+            });
+            document.getElementById('renameConfirm').addEventListener('click', confirmRename);
+            document.getElementById('renameCancel').addEventListener('click', closeRenamePopup);
+            // 回车确认
+            document.getElementById('renameText').addEventListener('keydown', e => {
+                if (e.key === 'Enter') confirmRename();
+            });
+            document.getElementById('renameEmoji').addEventListener('keydown', e => {
+                if (e.key === 'Enter') document.getElementById('renameText').focus();
+            });
+
             document.addEventListener('click', e => {
                 const popup = document.getElementById('themePopup');
                 const btn = document.getElementById('btnTheme');
                 if (popup.classList.contains('show') &&
                     !popup.contains(e.target) && !btn.contains(e.target)) {
                     closeThemePopup();
+                }
+                // 关闭重命名弹窗
+                const rp = document.getElementById('renamePopup');
+                const rb = document.getElementById('btnRename');
+                if (rp.classList.contains('show') &&
+                    !rp.contains(e.target) && !rb.contains(e.target)) {
+                    closeRenamePopup();
                 }
             });
 
