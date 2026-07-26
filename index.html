@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📌 便签本</title>
+    <style>
+        /* ===== 重置 & 基础 ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft YaHei", sans-serif;
+            height: 100vh;
+            background: #e8e4de;
+            color: #333;
+            overflow: hidden;
+        }
+
+        .app {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* ===== 便签颜色 ===== */
+        .note-color-yellow  { --note-color: #fef3c7; --note-border: #fde68a; --note-text: #92400e; }
+        .note-color-green   { --note-color: #d1fae5; --note-border: #a7f3d0; --note-text: #065f46; }
+        .note-color-blue    { --note-color: #dbeafe; --note-border: #93c5fd; --note-text: #1e40af; }
+        .note-color-pink    { --note-color: #fce7f3; --note-border: #f9a8d4; --note-text: #9d174d; }
+        .note-color-purple  { --note-color: #ede9fe; --note-border: #c4b5fd; --note-text: #5b21b6; }
+        .note-color-orange  { --note-color: #ffedd5; --note-border: #fdba74; --note-text: #9a3412; }
+
+        /* ===== 左侧边栏 ===== */
+        .sidebar {
+            width: 280px;
+            min-width: 180px;
+            max-width: 500px;
+            background: #faf8f5;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #e5e0d8;
+            position: relative;
+            user-select: none;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 14px 16px 10px;
+            border-bottom: 1px solid #e5e0d8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .sidebar-header h1 {
+            font-size: 17px;
+            font-weight: 700;
+            color: #5b4636;
+            letter-spacing: 0.3px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: #8b7a6a;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .btn-icon:hover {
+            background: #e8e0d6;
+            color: #5b4636;
+        }
+
+        .btn-add {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: none;
+            background: #f59e0b;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .btn-add:hover {
+            background: #d97706;
+            transform: scale(1.05);
+        }
+
+        .btn-add:active {
+            transform: scale(0.92);
+        }
+
+        /* ===== 调色盘 ===== */
+        .theme-popup {
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 44px;
+            background: #fff;
+            border: 1px solid #e5e0d8;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 999;
+            min-width: 180px;
+        }
+
+        .theme-popup.show { display: block; }
+
+        .theme-popup h4 {
+            font-size: 12px;
+            font-weight: 600;
+            color: #8b7a6a;
+            margin-bottom: 8px;
+        }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .theme-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            padding: 6px 4px 4px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .theme-option:hover { background: #f5f0eb; }
+        .theme-option.active { border-color: #f59e0b; }
+
+        .theme-swatch {
+            width: 26px; height: 26px;
+            border-radius: 50%;
+            border: 2px solid rgba(0,0,0,0.08);
+        }
+
+        .theme-option span {
+            font-size: 10px;
+            color: #8b7a6a;
+        }
+
+        .theme-option.active span { color: #5b4636; font-weight: 600; }
+
+        /* ===== 搜索栏 ===== */
+        .search-box {
+            padding: 8px 12px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 7px 10px;
+            border-radius: 8px;
+            border: 1px solid #e5e0d8;
+            background: #fff;
+            color: #5b4636;
+            font-size: 13px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .search-box input::placeholder { color: #b5a898; }
+        .search-box input:focus { border-color: #f59e0b; }
+
+        /* ===== 笔记列表（便签卡片） ===== */
+        .note-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 4px 10px 10px;
+        }
+
+        .note-list::-webkit-scrollbar { width: 4px; }
+        .note-list::-webkit-scrollbar-track { background: transparent; }
+        .note-list::-webkit-scrollbar-thumb { background: #d5cdc0; border-radius: 4px; }
+
+        .note-item {
+            padding: 10px 12px 10px 14px;
+            margin-bottom: 6px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+            border-left: 4px solid #e5e0d8;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .note-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transform: translateX(2px);
+        }
+
+        .note-item.active {
+            border-left-color: var(--accent-color, #f59e0b);
+            background: #fffbeb;
+            box-shadow: 0 2px 8px rgba(245,158,11,0.15);
+        }
+
+        .note-item.active .note-title { color: #92400e; }
+        .note-item.active .note-preview { color: #a16207; }
+
+        .note-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #5b4636;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 20px;
+        }
+
+        .note-preview {
+            font-size: 12px;
+            color: #a89888;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .note-date {
+            font-size: 10px;
+            color: #c5b8a8;
+            margin-top: 2px;
+        }
+
+        .note-delete {
+            position: absolute;
+            top: 8px; right: 8px;
+            width: 20px; height: 20px;
+            border-radius: 4px;
+            border: none;
+            background: transparent;
+            color: #c5b8a8;
+            font-size: 13px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            line-height: 1;
+        }
+
+        .note-item:hover .note-delete { display: flex; }
+        .note-delete:hover { background: #fee2e2; color: #ef4444; }
+
+        /* ===== 空状态 ===== */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #c5b8a8;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .empty-state .icon { font-size: 36px; margin-bottom: 10px; opacity: 0.5; }
+        .empty-state h3 { font-size: 14px; margin-bottom: 4px; color: #b5a898; }
+        .empty-state p { font-size: 12px; color: #c5b8a8; }
+
+        /* ===== 拖拽分隔条 ===== */
+        .resize-handle {
+            position: absolute;
+            top: 0; bottom: 0;
+            right: -4px;
+            width: 12px;
+            z-index: 50;
+            cursor: col-resize;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .resize-handle::after {
+            content: '';
+            width: 3px;
+            height: 40px;
+            border-radius: 2px;
+            background: #d5cdc0;
+            transition: all 0.2s;
+        }
+
+        .resize-handle:hover::after,
+        .resize-handle.resizing::after {
+            background: var(--accent-color, #f59e0b);
+            height: 60px;
+            width: 4px;
+        }
+
+        /* ===== 右侧主区域 ===== */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f5f0eb;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .main-header {
+            padding: 12px 20px;
+            border-bottom: 1px solid #e5e0d8;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .main-header h2 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #5b4636;
+        }
+
+        .main-header .meta {
+            font-size: 11px;
+            color: #b5a898;
+        }
+
+        /* ===== 便签编辑区 ===== */
+        .editor-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 24px 24px;
+            margin: 16px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 便签纸折角 */
+        .editor-area::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 0; height: 0;
+            border-style: solid;
+            border-width: 0 24px 24px 0;
+            border-color: transparent #f5f0eb transparent transparent;
+        }
+
+        .note-title-input {
+            width: 100%;
+            padding: 8px 0;
+            font-size: 20px;
+            font-weight: 700;
+            border: none;
+            background: transparent;
+            color: #5b4636;
+            outline: none;
+            margin-bottom: 12px;
+        }
+
+        .note-title-input::placeholder { color: #d5cdc0; }
+
+        .note-content-input {
+            flex: 1;
+            width: 100%;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1.9;
+            border: none;
+            background: transparent;
+            color: #6b5a4a;
+            outline: none;
+            resize: none;
+            font-family: inherit;
+        }
+
+        .note-content-input::placeholder { color: #d5cdc0; }
+
+        .char-count {
+            text-align: right;
+            font-size: 11px;
+            color: #c5b8a8;
+            padding-top: 6px;
+            border-top: 1px solid #f0ebe5;
+            margin-top: 8px;
+        }
+
+        .no-selection {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #c5b8a8;
+        }
+
+        .no-selection .icon { font-size: 56px; margin-bottom: 16px; opacity: 0.4; }
+        .no-selection h3 { font-size: 16px; color: #b5a898; margin-bottom: 6px; }
+        .no-selection p { font-size: 13px; color: #c5b8a8; }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 768px) {
+            .sidebar { width: 220px; min-width: 160px; }
+            .editor-area { margin: 10px; padding: 14px 16px 16px; }
+            .main-header { padding: 10px 16px; }
+        }
+
+        @media (max-width: 600px) {
+            .app { flex-direction: column; }
+            .sidebar {
+                width: 100% !important;
+                min-width: unset; max-width: unset;
+                height: 40vh; border-right: none;
+                border-bottom: 1px solid #e5e0d8;
+            }
+            .resize-handle { display: none; }
+            .main { height: 60vh; }
+            .editor-area { margin: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- ===== 左侧边栏 ===== -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1>📌 便签本</h1>
+                <div class="header-actions">
+                    <button class="btn-icon" id="btnTheme" title="主题">🎨</button>
+                    <button class="btn-add" id="btnAdd" title="新建">+</button>
+                </div>
+                <div class="theme-popup" id="themePopup">
+                    <h4>选择主题</h4>
+                    <div class="theme-grid" id="themeGrid"></div>
+                </div>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 搜索便签..." autocomplete="off">
+            </div>
+
+            <div class="note-list" id="noteList"></div>
+
+            <!-- ===== 拖拽分隔条 ===== -->
+            <div class="resize-handle" id="resizeHandle"></div>
+        </aside>
+
+        <!-- ===== 右侧主区域 ===== -->
+        <main class="main">
+            <div class="main-header">
+                <h2 id="displayTitle">📌 便签本</h2>
+                <span class="meta" id="displayDate"></span>
+            </div>
+
+            <div id="editorArea" class="editor-area" style="display:none;">
+                <input type="text" class="note-title-input" id="titleInput" placeholder="便签标题...">
+                <textarea class="note-content-input" id="contentInput" placeholder="写点什么呢..."></textarea>
+                <div class="char-count" id="charCount"></div>
+            </div>
+
+            <div id="noSelection" class="no-selection">
+                <div class="icon">📋</div>
+                <h3>选择或新建一张便签</h3>
+                <p>点击左侧便签查看内容</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ============================================================
+        //  便签颜色方案
+        // ============================================================
+        const NOTE_COLORS = [
+            { cls: 'note-color-yellow', label: '🥨 黄' },
+            { cls: 'note-color-green',  label: '🌿 绿' },
+            { cls: 'note-color-blue',   label: '💧 蓝' },
+            { cls: 'note-color-pink',   label: '🌸 粉' },
+            { cls: 'note-color-purple', label: '🔮 紫' },
+            { cls: 'note-color-orange', label: '🍊 橙' },
+        ];
+
+        // ============================================================
+        //  主题系统
+        // ============================================================
+        const THEMES = [
+            { id: 'default', label: '暖棕',  color: '#f59e0b' },
+            { id: 'ocean',   label: '海洋',  color: '#3b82f6' },
+            { id: 'forest',  label: '森林',  color: '#10b981' },
+            { id: 'sunset',  label: '日落',  color: '#f97316' },
+            { id: 'sakura',  label: '樱花',  color: '#ec4899' },
+            { id: 'minimal', label: '极简',  color: '#6b7280' },
+        ];
+
+        const THEME_STORAGE_KEY = 'sticky_notes_theme';
+        let currentTheme = 'default';
+
+        function loadTheme() {
+            const saved = localStorage.getItem(THEME_STORAGE_KEY);
+            if (saved && THEMES.some(t => t.id === saved)) currentTheme = saved;
+            applyTheme(currentTheme);
+        }
+
+        function applyTheme(id) {
+            const theme = THEMES.find(t => t.id === id);
+            if (!theme) return;
+            document.documentElement.style.setProperty('--accent-color', theme.color);
+            localStorage.setItem(THEME_STORAGE_KEY, id);
+            currentTheme = id;
+        }
+
+        function setTheme(id) {
+            applyTheme(id);
+            renderThemeGrid();
+            closeThemePopup();
+        }
+
+        function renderThemeGrid() {
+            const grid = document.getElementById('themeGrid');
+            grid.innerHTML = THEMES.map(t => `
+                <button class="theme-option ${t.id === currentTheme ? 'active' : ''}"
+                        data-theme="${t.id}" title="${t.label}">
+                    <div class="theme-swatch" style="background:${t.color}"></div>
+                    <span>${t.label}</span>
+                </button>
+            `).join('');
+        }
+
+        function toggleThemePopup() {
+            document.getElementById('themePopup').classList.toggle('show');
+            renderThemeGrid();
+        }
+
+        function closeThemePopup() {
+            document.getElementById('themePopup').classList.remove('show');
+        }
+
+        // ============================================================
+        //  数据管理
+        // ============================================================
+        const STORAGE_KEY = 'sticky_notes_app';
+
+        let notes = [];
+        let currentId = null;
+        let searchKeyword = '';
+
+        function loadNotes() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                try { notes = JSON.parse(raw); }
+                catch { notes = []; }
+            }
+            if (!notes.length) {
+                const now = new Date().toISOString();
+                notes.push({
+                    id: generateId(),
+                    title: '👋 欢迎使用便签本',
+                    content: '这是一张示例便签！\n\n✨ 功能：\n- 左侧点击便签查看内容\n- 右侧直接编辑，自动保存\n- 搜索框快速查找\n- 🎨 调色盘换主题色\n- ↔ 拖拽分隔条调整宽度\n- 每张便签有不同颜色',
+                    colorIdx: 0,
+                    createdAt: now,
+                    updatedAt: now,
+                });
+                saveNotes();
+            }
+        }
+
+        function saveNotes() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        }
+
+        function formatDate(iso) {
+            const d = new Date(iso);
+            const pad = n => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+
+        function getNowISO() {
+            return new Date().toISOString();
+        }
+
+        // ============================================================
+        //  渲染
+        // ============================================================
+        function render() {
+            renderList();
+            renderEditor();
+        }
+
+        function getFilteredNotes() {
+            if (!searchKeyword.trim()) return notes;
+            const kw = searchKeyword.trim().toLowerCase();
+            return notes.filter(n =>
+                (n.title || '').toLowerCase().includes(kw) ||
+                (n.content || '').toLowerCase().includes(kw)
+            );
+        }
+
+        function renderList() {
+            const container = document.getElementById('noteList');
+            const filtered = getFilteredNotes();
+
+            if (!filtered.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">${searchKeyword ? '🔍' : '📋'}</div>
+                        <h3>${searchKeyword ? '没有找到' : '暂无便签'}</h3>
+                        <p>${searchKeyword ? '试试其他关键词' : '点击 + 新建一张'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(n => {
+                const preview = (n.content || '').replace(/\n/g, ' ').slice(0, 50) || '点击编辑';
+                const isActive = n.id === currentId;
+                const borderColor = getColorBorder(n.colorIdx);
+                return `
+                    <div class="note-item ${isActive ? 'active' : ''}"
+                         data-id="${n.id}"
+                         style="border-left-color: ${isActive ? '' : borderColor};">
+                        <div class="note-title">${escapeHtml(n.title || '无标题')}</div>
+                        <div class="note-preview">${escapeHtml(preview)}</div>
+                        <div class="note-date">${formatDate(n.updatedAt)}</div>
+                        <button class="note-delete" data-id="${n.id}" title="删除">✕</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getColorBorder(idx) {
+            const colors = ['#fde68a', '#a7f3d0', '#93c5fd', '#f9a8d4', '#c4b5fd', '#fdba74'];
+            return colors[idx] || '#e5e0d8';
+        }
+
+        function renderEditor() {
+            const editor = document.getElementById('editorArea');
+            const noSel = document.getElementById('noSelection');
+            const titleEl = document.getElementById('displayTitle');
+            const dateEl = document.getElementById('displayDate');
+
+            if (!currentId) {
+                editor.style.display = 'none';
+                noSel.style.display = 'flex';
+                titleEl.textContent = '📌 便签本';
+                dateEl.textContent = '';
+                return;
+            }
+
+            const note = notes.find(n => n.id === currentId);
+            if (!note) {
+                currentId = notes.length ? notes[0].id : null;
+                render();
+                return;
+            }
+
+            editor.style.display = 'flex';
+            noSel.style.display = 'none';
+            titleEl.textContent = note.title || '无标题';
+            dateEl.textContent = `编辑于 ${formatDate(note.updatedAt)}`;
+
+            document.getElementById('titleInput').value = note.title || '';
+            document.getElementById('contentInput').value = note.content || '';
+            updateCharCount();
+        }
+
+        function updateCharCount() {
+            const len = document.getElementById('contentInput').value.length;
+            document.getElementById('charCount').textContent = `${len} 字`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ============================================================
+        //  笔记操作
+        // ============================================================
+        function addNote() {
+            const now = getNowISO();
+            const note = {
+                id: generateId(),
+                title: '新便签',
+                content: '',
+                colorIdx: Math.floor(Math.random() * NOTE_COLORS.length),
+                createdAt: now,
+                updatedAt: now,
+            };
+            notes.unshift(note);
+            saveNotes();
+            currentId = note.id;
+            render();
+            setTimeout(() => {
+                const input = document.getElementById('titleInput');
+                if (input) { input.focus(); input.select(); }
+            }, 50);
+        }
+
+        function deleteNote(id, e) {
+            if (e) e.stopPropagation();
+            notes = notes.filter(n => n.id !== id);
+            if (currentId === id) {
+                currentId = notes.length ? notes[0].id : null;
+            }
+            saveNotes();
+            render();
+        }
+
+        function selectNote(id) {
+            currentId = id;
+            render();
+        }
+
+        // ============================================================
+        //  自动保存
+        // ============================================================
+        let saveTimer = null;
+
+        function handleEdit() {
+            if (!currentId) return;
+            const note = notes.find(n => n.id === currentId);
+            if (!note) return;
+
+            const newTitle = document.getElementById('titleInput').value;
+            const newContent = document.getElementById('contentInput').value;
+            if (note.title === newTitle && note.content === newContent) return;
+
+            note.title = newTitle;
+            note.content = newContent;
+            note.updatedAt = getNowISO();
+            updateCharCount();
+
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(() => {
+                saveNotes();
+                renderList();
+                document.getElementById('displayTitle').textContent = note.title || '无标题';
+                document.getElementById('displayDate').textContent = `编辑于 ${formatDate(note.updatedAt)}`;
+            }, 300);
+        }
+
+        // ============================================================
+        //  搜索
+        // ============================================================
+        function handleSearch() {
+            searchKeyword = document.getElementById('searchInput').value;
+            const filtered = getFilteredNotes();
+            if (currentId && !filtered.some(n => n.id === currentId)) {
+                currentId = filtered.length ? filtered[0].id : null;
+            }
+            render();
+        }
+
+        // ============================================================
+        //  侧边栏拖拽（修复版）
+        // ============================================================
+        let isResizing = false;
+
+        function initResize() {
+            const handle = document.getElementById('resizeHandle');
+            if (!handle) return;
+
+            handle.addEventListener('mousedown', onResizeStart);
+            document.addEventListener('mousemove', onResizeMove);
+            document.addEventListener('mouseup', onResizeEnd);
+
+            handle.addEventListener('touchstart', onResizeTouchStart, { passive: true });
+            document.addEventListener('touchmove', onResizeTouchMove, { passive: false });
+            document.addEventListener('touchend', onResizeEnd);
+        }
+
+        function onResizeStart(e) {
+            isResizing = true;
+            document.getElementById('resizeHandle').classList.add('resizing');
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+            e.preventDefault();
+        }
+
+        function onResizeTouchStart() {
+            isResizing = true;
+            document.getElementById('resizeHandle').classList.add('resizing');
+            document.body.style.userSelect = 'none';
+        }
+
+        function onResizeMove(e) {
+            if (!isResizing) return;
+            const sidebar = document.getElementById('sidebar');
+            let w = e.clientX;
+            w = Math.max(180, Math.min(500, w));
+            sidebar.style.width = w + 'px';
+            sidebar.style.flex = 'none';
+        }
+
+        function onResizeTouchMove(e) {
+            if (!isResizing) return;
+            e.preventDefault();
+            const sidebar = document.getElementById('sidebar');
+            let w = e.touches[0].clientX;
+            w = Math.max(180, Math.min(500, w));
+            sidebar.style.width = w + 'px';
+            sidebar.style.flex = 'none';
+        }
+
+        function saveSidebarWidth() {
+            const w = document.getElementById('sidebar').offsetWidth;
+            localStorage.setItem('sticky_notes_sidebar_width', w);
+        }
+
+        function onResizeEnd() {
+            if (!isResizing) return;
+            isResizing = false;
+            document.getElementById('resizeHandle').classList.remove('resizing');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            saveSidebarWidth();
+        }
+
+        function loadSidebarWidth() {
+            const saved = localStorage.getItem('sticky_notes_sidebar_width');
+            if (saved) {
+                const w = parseInt(saved, 10);
+                if (w >= 180 && w <= 500) {
+                    document.getElementById('sidebar').style.width = w + 'px';
+                    document.getElementById('sidebar').style.flex = 'none';
+                }
+            }
+        }
+
+        // ============================================================
+        //  键盘快捷键
+        // ============================================================
+        function handleKeydown(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                e.preventDefault();
+                addNote();
+            }
+            if (e.key === 'Escape') {
+                closeThemePopup();
+                if (currentId) { currentId = null; render(); }
+            }
+        }
+
+        // ============================================================
+        //  初始化
+        // ============================================================
+        function init() {
+            document.documentElement.style.setProperty('--accent-color', '#f59e0b');
+
+            loadTheme();
+            loadNotes();
+            currentId = notes.length ? notes[0].id : null;
+            loadSidebarWidth();
+            render();
+            renderThemeGrid();
+
+            document.getElementById('btnAdd').addEventListener('click', addNote);
+
+            document.getElementById('btnTheme').addEventListener('click', e => {
+                e.stopPropagation();
+                toggleThemePopup();
+            });
+
+            document.getElementById('themeGrid').addEventListener('click', e => {
+                const btn = e.target.closest('.theme-option');
+                if (btn) setTheme(btn.dataset.theme);
+            });
+
+            document.addEventListener('click', e => {
+                const popup = document.getElementById('themePopup');
+                const btn = document.getElementById('btnTheme');
+                if (popup.classList.contains('show') &&
+                    !popup.contains(e.target) && !btn.contains(e.target)) {
+                    closeThemePopup();
+                }
+            });
+
+            document.getElementById('searchInput').addEventListener('input', handleSearch);
+
+            document.getElementById('noteList').addEventListener('click', e => {
+                const item = e.target.closest('.note-item');
+                const delBtn = e.target.closest('.note-delete');
+                if (delBtn) { deleteNote(delBtn.dataset.id, e); return; }
+                if (item) selectNote(item.dataset.id);
+            });
+
+            document.getElementById('titleInput').addEventListener('input', handleEdit);
+            document.getElementById('contentInput').addEventListener('input', handleEdit);
+
+            document.addEventListener('keydown', handleKeydown);
+
+            document.getElementById('editorArea').addEventListener('click', e => {
+                if (e.target === e.currentTarget) {
+                    document.getElementById('contentInput').focus();
+                }
+            });
+
+            initResize();
+
+            console.log('📌 便签本已启动！');
+            console.log('💡 Ctrl+N 新建 | Esc 返回 | ↔ 拖拽调宽');
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
