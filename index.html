@@ -8,10 +8,129 @@
         /* ===== 重置 & 基础 ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        /* ===== 日间模式 (默认) ===== */
+        :root {
+            --page-bg: #e8e4de;
+            --sidebar-bg: #faf8f5;
+            --sidebar-border: #e5e0d8;
+            --sidebar-header-text: #5b4636;
+            --header-actions-color: #8b7a6a;
+            --header-actions-hover-bg: #e8e0d6;
+            --header-actions-hover-color: #5b4636;
+            --btn-add-bg: #f59e0b;
+            --btn-add-hover: #d97706;
+            --search-bg: #ffffff;
+            --search-border: #e5e0d8;
+            --search-text: #5b4636;
+            --search-placeholder: #b5a898;
+            --search-focus: #f59e0b;
+            --item-bg: #ffffff;
+            --item-border: #e5e0d8;
+            --item-hover-shadow: rgba(0,0,0,0.08);
+            --item-active-bg: #fffbeb;
+            --item-active-shadow: rgba(245,158,11,0.15);
+            --item-active-title: #92400e;
+            --item-active-preview: #a16207;
+            --item-title: #5b4636;
+            --item-preview: #a89888;
+            --item-date: #c5b8a8;
+            --scrollbar-thumb: #d5cdc0;
+            --empty-color: #c5b8a8;
+            --empty-heading: #b5a898;
+            --resize-handle-bar: #d5cdc0;
+            --resize-handle-hover: var(--accent-color, #f59e0b);
+            --main-bg: #f5f0eb;
+            --main-header-bg: rgba(255,255,255,0.85);
+            --main-header-border: #e5e0d8;
+            --main-header-title: #5b4636;
+            --main-header-meta: #b5a898;
+            --editor-bg: #ffffff;
+            --editor-shadow: rgba(0,0,0,0.04);
+            --editor-title: #5b4636;
+            --editor-title-placeholder: #d5cdc0;
+            --editor-content: #6b5a4a;
+            --editor-content-placeholder: #d5cdc0;
+            --editor-fold: #f5f0eb;
+            --char-count-text: #c5b8a8;
+            --char-count-border: #f0ebe5;
+            --noselect-color: #c5b8a8;
+            --noselect-heading: #b5a898;
+            --theme-popup-bg: #fff;
+            --theme-popup-border: #e5e0d8;
+            --theme-popup-shadow: rgba(0,0,0,0.1);
+            --theme-option-hover: #f5f0eb;
+            --theme-label: #8b7a6a;
+            --theme-label-active: #5b4636;
+            --toggle-track-off: #d5cdc0;
+            --toggle-track-on: #f59e0b;
+            --toggle-thumb: #fff;
+            --sidebar-footer-border: #e5e0d8;
+            --accent-color: #f59e0b;
+        }
+
+        /* ===== 夜间模式 ===== */
+        [data-dark-mode="true"] {
+            --page-bg: #1a1a2e;
+            --sidebar-bg: #16162a;
+            --sidebar-border: #2a2a44;
+            --sidebar-header-text: #e0d8cc;
+            --header-actions-color: #7a7a9a;
+            --header-actions-hover-bg: #2a2a44;
+            --header-actions-hover-color: #e0d8cc;
+            --btn-add-bg: #f59e0b;
+            --btn-add-hover: #eab308;
+            --search-bg: #1e1e36;
+            --search-border: #2a2a44;
+            --search-text: #e0d8cc;
+            --search-placeholder: #5a5a7a;
+            --search-focus: #f59e0b;
+            --item-bg: #1e1e36;
+            --item-border: #2a2a44;
+            --item-hover-shadow: rgba(0,0,0,0.3);
+            --item-active-bg: #2a2a50;
+            --item-active-shadow: rgba(245,158,11,0.2);
+            --item-active-title: #fde68a;
+            --item-active-preview: #d4a574;
+            --item-title: #d5cdc0;
+            --item-preview: #7a7a9a;
+            --item-date: #5a5a7a;
+            --scrollbar-thumb: #3a3a5a;
+            --empty-color: #5a5a7a;
+            --empty-heading: #7a7a9a;
+            --resize-handle-bar: #3a3a5a;
+            --resize-handle-hover: var(--accent-color, #f59e0b);
+            --main-bg: #12122a;
+            --main-header-bg: rgba(22,22,46,0.9);
+            --main-header-border: #2a2a44;
+            --main-header-title: #d5cdc0;
+            --main-header-meta: #5a5a7a;
+            --editor-bg: #1a1a32;
+            --editor-shadow: rgba(0,0,0,0.3);
+            --editor-title: #d5cdc0;
+            --editor-title-placeholder: #4a4a6a;
+            --editor-content: #b5a8a0;
+            --editor-content-placeholder: #4a4a6a;
+            --editor-fold: #12122a;
+            --char-count-text: #5a5a7a;
+            --char-count-border: #2a2a44;
+            --noselect-color: #5a5a7a;
+            --noselect-heading: #7a7a9a;
+            --theme-popup-bg: #1e1e36;
+            --theme-popup-border: #2a2a44;
+            --theme-popup-shadow: rgba(0,0,0,0.4);
+            --theme-option-hover: #2a2a44;
+            --theme-label: #7a7a9a;
+            --theme-label-active: #e0d8cc;
+            --toggle-track-off: #3a3a5a;
+            --toggle-track-on: #f59e0b;
+            --toggle-thumb: #e0d8cc;
+            --sidebar-footer-border: #2a2a44;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft YaHei", sans-serif;
             height: 100vh;
-            background: #e8e4de;
+            background: var(--page-bg);
             color: #333;
             overflow: hidden;
         }
@@ -21,7 +140,7 @@
             height: 100vh;
         }
 
-        /* ===== 便签颜色 ===== */
+        /* ===== 便签颜色（夜间模式适配） ===== */
         .note-color-yellow  { --note-color: #fef3c7; --note-border: #fde68a; --note-text: #92400e; }
         .note-color-green   { --note-color: #d1fae5; --note-border: #a7f3d0; --note-text: #065f46; }
         .note-color-blue    { --note-color: #dbeafe; --note-border: #93c5fd; --note-text: #1e40af; }
@@ -29,15 +148,22 @@
         .note-color-purple  { --note-color: #ede9fe; --note-border: #c4b5fd; --note-text: #5b21b6; }
         .note-color-orange  { --note-color: #ffedd5; --note-border: #fdba74; --note-text: #9a3412; }
 
+        [data-dark-mode="true"] .note-color-yellow  { --note-color: #3a2e18; --note-border: #5a4a28; --note-text: #fde68a; }
+        [data-dark-mode="true"] .note-color-green   { --note-color: #143a28; --note-border: #1e5a3a; --note-text: #a7f3d0; }
+        [data-dark-mode="true"] .note-color-blue    { --note-color: #1a2a4a; --note-border: #2a3e6a; --note-text: #93c5fd; }
+        [data-dark-mode="true"] .note-color-pink    { --note-color: #3a1a2e; --note-border: #5a2844; --note-text: #f9a8d4; }
+        [data-dark-mode="true"] .note-color-purple  { --note-color: #2a1a3e; --note-border: #3e2860; --note-text: #c4b5fd; }
+        [data-dark-mode="true"] .note-color-orange  { --note-color: #3a2418; --note-border: #5a3828; --note-text: #fdba74; }
+
         /* ===== 左侧边栏 ===== */
         .sidebar {
             width: 280px;
             min-width: 180px;
             max-width: 500px;
-            background: #faf8f5;
+            background: var(--sidebar-bg);
             display: flex;
             flex-direction: column;
-            border-right: 1px solid #e5e0d8;
+            border-right: 1px solid var(--sidebar-border);
             position: relative;
             user-select: none;
             flex-shrink: 0;
@@ -45,7 +171,7 @@
 
         .sidebar-header {
             padding: 14px 16px 10px;
-            border-bottom: 1px solid #e5e0d8;
+            border-bottom: 1px solid var(--sidebar-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -57,7 +183,7 @@
         .sidebar-header h1 {
             font-size: 17px;
             font-weight: 700;
-            color: #5b4636;
+            color: var(--sidebar-header-text);
             letter-spacing: 0.3px;
         }
 
@@ -68,12 +194,11 @@
         }
 
         .btn-icon {
-            width: 30px;
-            height: 30px;
+            width: 30px; height: 30px;
             border-radius: 8px;
             border: none;
             background: transparent;
-            color: #8b7a6a;
+            color: var(--header-actions-color);
             font-size: 15px;
             cursor: pointer;
             display: flex;
@@ -83,16 +208,15 @@
         }
 
         .btn-icon:hover {
-            background: #e8e0d6;
-            color: #5b4636;
+            background: var(--header-actions-hover-bg);
+            color: var(--header-actions-hover-color);
         }
 
         .btn-add {
-            width: 30px;
-            height: 30px;
+            width: 30px; height: 30px;
             border-radius: 8px;
             border: none;
-            background: #f59e0b;
+            background: var(--btn-add-bg);
             color: #fff;
             font-size: 18px;
             font-weight: 700;
@@ -104,24 +228,22 @@
         }
 
         .btn-add:hover {
-            background: #d97706;
+            background: var(--btn-add-hover);
             transform: scale(1.05);
         }
 
-        .btn-add:active {
-            transform: scale(0.92);
-        }
+        .btn-add:active { transform: scale(0.92); }
 
         /* ===== 调色盘 ===== */
         .theme-popup {
             position: absolute;
             top: calc(100% + 4px);
             right: 44px;
-            background: #fff;
-            border: 1px solid #e5e0d8;
+            background: var(--theme-popup-bg);
+            border: 1px solid var(--theme-popup-border);
             border-radius: 12px;
             padding: 12px;
-            box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 24px var(--theme-popup-shadow);
             display: none;
             z-index: 999;
             min-width: 180px;
@@ -132,7 +254,7 @@
         .theme-popup h4 {
             font-size: 12px;
             font-weight: 600;
-            color: #8b7a6a;
+            color: var(--theme-label);
             margin-bottom: 8px;
         }
 
@@ -155,8 +277,8 @@
             transition: all 0.15s;
         }
 
-        .theme-option:hover { background: #f5f0eb; }
-        .theme-option.active { border-color: #f59e0b; }
+        .theme-option:hover { background: var(--theme-option-hover); }
+        .theme-option.active { border-color: var(--accent-color); }
 
         .theme-swatch {
             width: 26px; height: 26px;
@@ -166,10 +288,10 @@
 
         .theme-option span {
             font-size: 10px;
-            color: #8b7a6a;
+            color: var(--theme-label);
         }
 
-        .theme-option.active span { color: #5b4636; font-weight: 600; }
+        .theme-option.active span { color: var(--theme-label-active); font-weight: 600; }
 
         /* ===== 搜索栏 ===== */
         .search-box {
@@ -180,16 +302,16 @@
             width: 100%;
             padding: 7px 10px;
             border-radius: 8px;
-            border: 1px solid #e5e0d8;
-            background: #fff;
-            color: #5b4636;
+            border: 1px solid var(--search-border);
+            background: var(--search-bg);
+            color: var(--search-text);
             font-size: 13px;
             outline: none;
             transition: border 0.2s;
         }
 
-        .search-box input::placeholder { color: #b5a898; }
-        .search-box input:focus { border-color: #f59e0b; }
+        .search-box input::placeholder { color: var(--search-placeholder); }
+        .search-box input:focus { border-color: var(--search-focus); }
 
         /* ===== 笔记列表（便签卡片） ===== */
         .note-list {
@@ -200,7 +322,7 @@
 
         .note-list::-webkit-scrollbar { width: 4px; }
         .note-list::-webkit-scrollbar-track { background: transparent; }
-        .note-list::-webkit-scrollbar-thumb { background: #d5cdc0; border-radius: 4px; }
+        .note-list::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
 
         .note-item {
             padding: 10px 12px 10px 14px;
@@ -209,29 +331,29 @@
             cursor: pointer;
             transition: all 0.15s;
             position: relative;
-            border-left: 4px solid #e5e0d8;
-            background: #fff;
+            border-left: 4px solid var(--item-border);
+            background: var(--item-bg);
             box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
 
         .note-item:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px var(--item-hover-shadow);
             transform: translateX(2px);
         }
 
         .note-item.active {
-            border-left-color: var(--accent-color, #f59e0b);
-            background: #fffbeb;
-            box-shadow: 0 2px 8px rgba(245,158,11,0.15);
+            border-left-color: var(--accent-color);
+            background: var(--item-active-bg);
+            box-shadow: 0 2px 8px var(--item-active-shadow);
         }
 
-        .note-item.active .note-title { color: #92400e; }
-        .note-item.active .note-preview { color: #a16207; }
+        .note-item.active .note-title { color: var(--item-active-title); }
+        .note-item.active .note-preview { color: var(--item-active-preview); }
 
         .note-title {
             font-size: 14px;
             font-weight: 600;
-            color: #5b4636;
+            color: var(--item-title);
             margin-bottom: 2px;
             white-space: nowrap;
             overflow: hidden;
@@ -241,7 +363,7 @@
 
         .note-preview {
             font-size: 12px;
-            color: #a89888;
+            color: var(--item-preview);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -249,7 +371,7 @@
 
         .note-date {
             font-size: 10px;
-            color: #c5b8a8;
+            color: var(--item-date);
             margin-top: 2px;
         }
 
@@ -260,7 +382,7 @@
             border-radius: 4px;
             border: none;
             background: transparent;
-            color: #c5b8a8;
+            color: var(--item-date);
             font-size: 13px;
             cursor: pointer;
             display: none;
@@ -280,14 +402,14 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            color: #c5b8a8;
+            color: var(--empty-color);
             padding: 20px;
             text-align: center;
         }
 
         .empty-state .icon { font-size: 36px; margin-bottom: 10px; opacity: 0.5; }
-        .empty-state h3 { font-size: 14px; margin-bottom: 4px; color: #b5a898; }
-        .empty-state p { font-size: 12px; color: #c5b8a8; }
+        .empty-state h3 { font-size: 14px; margin-bottom: 4px; color: var(--empty-heading); }
+        .empty-state p { font-size: 12px; color: var(--empty-color); }
 
         /* ===== 拖拽分隔条 ===== */
         .resize-handle {
@@ -307,13 +429,13 @@
             width: 3px;
             height: 40px;
             border-radius: 2px;
-            background: #d5cdc0;
+            background: var(--resize-handle-bar);
             transition: all 0.2s;
         }
 
         .resize-handle:hover::after,
         .resize-handle.resizing::after {
-            background: var(--accent-color, #f59e0b);
+            background: var(--resize-handle-hover);
             height: 60px;
             width: 4px;
         }
@@ -323,15 +445,15 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: #f5f0eb;
+            background: var(--main-bg);
             min-width: 200px;
             position: relative;
         }
 
         .main-header {
             padding: 12px 20px;
-            border-bottom: 1px solid #e5e0d8;
-            background: rgba(255,255,255,0.85);
+            border-bottom: 1px solid var(--main-header-border);
+            background: var(--main-header-bg);
             backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
@@ -341,12 +463,12 @@
         .main-header h2 {
             font-size: 15px;
             font-weight: 600;
-            color: #5b4636;
+            color: var(--main-header-title);
         }
 
         .main-header .meta {
             font-size: 11px;
-            color: #b5a898;
+            color: var(--main-header-meta);
         }
 
         /* ===== 便签编辑区 ===== */
@@ -356,9 +478,9 @@
             flex-direction: column;
             padding: 20px 24px 24px;
             margin: 16px;
-            background: #fff;
+            background: var(--editor-bg);
             border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 12px var(--editor-shadow), 0 1px 3px rgba(0,0,0,0.06);
             position: relative;
             overflow: hidden;
         }
@@ -371,7 +493,7 @@
             width: 0; height: 0;
             border-style: solid;
             border-width: 0 24px 24px 0;
-            border-color: transparent #f5f0eb transparent transparent;
+            border-color: transparent var(--editor-fold) transparent transparent;
         }
 
         .note-title-input {
@@ -381,12 +503,12 @@
             font-weight: 700;
             border: none;
             background: transparent;
-            color: #5b4636;
+            color: var(--editor-title);
             outline: none;
             margin-bottom: 12px;
         }
 
-        .note-title-input::placeholder { color: #d5cdc0; }
+        .note-title-input::placeholder { color: var(--editor-title-placeholder); }
 
         .note-content-input {
             flex: 1;
@@ -396,20 +518,20 @@
             line-height: 1.9;
             border: none;
             background: transparent;
-            color: #6b5a4a;
+            color: var(--editor-content);
             outline: none;
             resize: none;
             font-family: inherit;
         }
 
-        .note-content-input::placeholder { color: #d5cdc0; }
+        .note-content-input::placeholder { color: var(--editor-content-placeholder); }
 
         .char-count {
             text-align: right;
             font-size: 11px;
-            color: #c5b8a8;
+            color: var(--char-count-text);
             padding-top: 6px;
-            border-top: 1px solid #f0ebe5;
+            border-top: 1px solid var(--char-count-border);
             margin-top: 8px;
         }
 
@@ -419,12 +541,93 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #c5b8a8;
+            color: var(--noselect-color);
         }
 
         .no-selection .icon { font-size: 56px; margin-bottom: 16px; opacity: 0.4; }
-        .no-selection h3 { font-size: 16px; color: #b5a898; margin-bottom: 6px; }
-        .no-selection p { font-size: 13px; color: #c5b8a8; }
+        .no-selection h3 { font-size: 16px; color: var(--noselect-heading); margin-bottom: 6px; }
+        .no-selection p { font-size: 13px; color: var(--noselect-color); }
+
+        /* ===== 夜间模式切换开关 ===== */
+        .sidebar-footer {
+            padding: 10px 14px 12px;
+            border-top: 1px solid var(--sidebar-footer-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-footer .label {
+            font-size: 12px;
+            color: var(--item-preview);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 42px;
+            height: 24px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .toggle-track {
+            position: absolute;
+            inset: 0;
+            background: var(--toggle-track-off);
+            border-radius: 12px;
+            transition: background 0.25s;
+        }
+
+        .toggle-thumb {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: var(--toggle-thumb);
+            border-radius: 50%;
+            transition: transform 0.25s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch input:checked + .toggle-track {
+            background: var(--toggle-track-on);
+        }
+
+        .toggle-switch input:checked + .toggle-track .toggle-thumb,
+        .toggle-switch input:checked ~ .toggle-track .toggle-thumb {
+            transform: translateX(18px);
+        }
+
+        /* 自动跟随标签 */
+        .auto-badge {
+            font-size: 10px;
+            color: var(--theme-label);
+            background: var(--theme-option-hover);
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .auto-badge:hover {
+            color: var(--theme-label-active);
+        }
+
+        .auto-badge.active {
+            background: var(--accent-color);
+            color: #fff;
+        }
 
         /* ===== 响应式 ===== */
         @media (max-width: 768px) {
@@ -468,6 +671,20 @@
             </div>
 
             <div class="note-list" id="noteList"></div>
+
+            <!-- ===== 底部：夜间模式切换 ===== -->
+            <div class="sidebar-footer">
+                <span class="label">🌙 夜间模式</span>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="auto-badge" id="autoBadge" title="跟随系统时间自动切换">⏰ 自动</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="darkToggle">
+                        <div class="toggle-track">
+                            <div class="toggle-thumb"></div>
+                        </div>
+                    </label>
+                </div>
+            </div>
 
             <!-- ===== 拖拽分隔条 ===== -->
             <div class="resize-handle" id="resizeHandle"></div>
@@ -563,6 +780,89 @@
         }
 
         // ============================================================
+        //  夜间 / 日间模式
+        // ============================================================
+        const DARK_STORAGE_KEY = 'sticky_notes_dark';
+        const AUTO_STORAGE_KEY = 'sticky_notes_auto';
+
+        let isDarkMode = false;
+        let isAutoMode = true; // 默认跟随系统时间
+
+        function isNightTime() {
+            const h = new Date().getHours();
+            return h < 6 || h >= 19; // 19:00 ~ 06:00 为夜间
+        }
+
+        function loadDarkMode() {
+            const autoSaved = localStorage.getItem(AUTO_STORAGE_KEY);
+            if (autoSaved !== null) {
+                isAutoMode = autoSaved === 'true';
+            } else {
+                isAutoMode = true;
+            }
+
+            if (isAutoMode) {
+                isDarkMode = isNightTime();
+            } else {
+                const saved = localStorage.getItem(DARK_STORAGE_KEY);
+                isDarkMode = saved === 'true';
+            }
+            applyDarkMode();
+            updateDarkUI();
+        }
+
+        function applyDarkMode() {
+            if (isDarkMode) {
+                document.documentElement.setAttribute('data-dark-mode', 'true');
+            } else {
+                document.documentElement.removeAttribute('data-dark-mode');
+            }
+        }
+
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            isAutoMode = false;
+            localStorage.setItem(DARK_STORAGE_KEY, isDarkMode);
+            localStorage.setItem(AUTO_STORAGE_KEY, 'false');
+            applyDarkMode();
+            updateDarkUI();
+        }
+
+        function toggleAutoMode() {
+            isAutoMode = !isAutoMode;
+            localStorage.setItem(AUTO_STORAGE_KEY, isAutoMode);
+            if (isAutoMode) {
+                isDarkMode = isNightTime();
+                applyDarkMode();
+            }
+            updateDarkUI();
+        }
+
+        function updateDarkUI() {
+            const toggle = document.getElementById('darkToggle');
+            const badge = document.getElementById('autoBadge');
+            if (toggle) toggle.checked = isDarkMode;
+            if (badge) {
+                badge.classList.toggle('active', isAutoMode);
+                badge.textContent = isAutoMode ? '⏰ 自动' : '🖐 手动';
+            }
+        }
+
+        // 每小时检查一次系统时间（自动模式）
+        function startAutoTimer() {
+            setInterval(() => {
+                if (isAutoMode) {
+                    const night = isNightTime();
+                    if (night !== isDarkMode) {
+                        isDarkMode = night;
+                        applyDarkMode();
+                        updateDarkUI();
+                    }
+                }
+            }, 60000); // 每分钟检查
+        }
+
+        // ============================================================
         //  数据管理
         // ============================================================
         const STORAGE_KEY = 'sticky_notes_app';
@@ -582,7 +882,7 @@
                 notes.push({
                     id: generateId(),
                     title: '👋 欢迎使用便签本',
-                    content: '这是一张示例便签！\n\n✨ 功能：\n- 左侧点击便签查看内容\n- 右侧直接编辑，自动保存\n- 搜索框快速查找\n- 🎨 调色盘换主题色\n- ↔ 拖拽分隔条调整宽度\n- 每张便签有不同颜色',
+                    content: '这是一张示例便签！\n\n✨ 功能：\n- 左侧点击便签查看内容\n- 右侧直接编辑，自动保存\n- 搜索框快速查找\n- 🎨 调色盘换主题色\n- ↔ 拖拽分隔条调整宽度\n- 🌙 底部开关夜间/日间模式\n- ⏰ 支持跟随时间自动切换\n- 每张便签有不同颜色',
                     colorIdx: 0,
                     createdAt: now,
                     updatedAt: now,
@@ -880,6 +1180,7 @@
             document.documentElement.style.setProperty('--accent-color', '#f59e0b');
 
             loadTheme();
+            loadDarkMode();
             loadNotes();
             currentId = notes.length ? notes[0].id : null;
             loadSidebarWidth();
@@ -927,10 +1228,15 @@
                 }
             });
 
+            // 夜间模式切换
+            document.getElementById('darkToggle').addEventListener('change', toggleDarkMode);
+            document.getElementById('autoBadge').addEventListener('click', toggleAutoMode);
+
             initResize();
+            startAutoTimer();
 
             console.log('📌 便签本已启动！');
-            console.log('💡 Ctrl+N 新建 | Esc 返回 | ↔ 拖拽调宽');
+            console.log('💡 Ctrl+N 新建 | Esc 返回 | ↔ 拖拽调宽 | 🌙 夜间模式');
         }
 
         document.addEventListener('DOMContentLoaded', init);
