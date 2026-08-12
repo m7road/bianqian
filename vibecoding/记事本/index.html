@@ -954,6 +954,34 @@
             color: #fff;
         }
 
+        /* 标题收纳箭头（Word 大纲折叠） */
+        .heading-toggle {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            border: none;
+            background: transparent;
+            color: var(--item-preview);
+            font-size: 9px;
+            cursor: pointer;
+            border-radius: 4px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: all 0.15s;
+        }
+        .heading-toggle:hover {
+            background: var(--theme-option-hover);
+            color: var(--theme-label-active);
+        }
+        .heading-toggle.empty { visibility: hidden; }
+        .block-heading.collapsed .block-input {
+            color: var(--item-preview);
+            font-style: italic;
+        }
+
         .block-heading.lvl1 { box-shadow: inset 3px 0 0 0 var(--accent-color); padding-left: 6px; }
         .block-heading.lvl2 { box-shadow: inset 3px 0 0 0 var(--resize-handle-bar); padding-left: 26px; }
         .block-heading.lvl3 { box-shadow: inset 3px 0 0 0 var(--char-count-border); padding-left: 46px; }
@@ -2006,16 +2034,53 @@
                 container.innerHTML = `<div class="block-empty">写点什么呢...</div>`;
                 return;
             }
-            container.innerHTML = blocks.map((b, i) => renderBlock(b, i)).join('');
+            let html = '';
+            let skipLevel = Infinity; // 正在被收纳的标题层级（Word 大纲折叠逻辑）
+            for (let i = 0; i < blocks.length; i++) {
+                const b = blocks[i];
+                if (skipLevel !== Infinity) {
+                    // 该块被上级标题收纳了，跳过；遇到同级或更高级标题时恢复显示
+                    if (b.type === 'heading' && (b.level || 1) <= skipLevel) {
+                        skipLevel = Infinity;
+                    } else {
+                        continue;
+                    }
+                }
+                if (b.type === 'heading') {
+                    const lvl = b.level || 1;
+                    const hasChildren = headingHasChildren(blocks, i);
+                    html += renderBlock(b, i, { hasChildren, collapsed: !!b.collapsed && hasChildren });
+                    if (b.collapsed && hasChildren) skipLevel = lvl;
+                } else {
+                    html += renderBlock(b, i, {});
+                }
+            }
+            container.innerHTML = html;
         }
 
-        function renderBlock(b, i) {
+        // 判断标题后面是否有可被收纳的内容块（直到下一个同级/更高级标题）
+        function headingHasChildren(blocks, i) {
+            const lvl = blocks[i].level || 1;
+            for (let j = i + 1; j < blocks.length; j++) {
+                const b = blocks[j];
+                if (b.type === 'heading' && (b.level || 1) <= lvl) return false;
+                return true;
+            }
+            return false;
+        }
+
+        function renderBlock(b, i, opts) {
+            const o = opts || {};
             const active = i === activeBlockIndex ? ' active' : '';
             const del = `<button class="block-delete" title="删除">✕</button>`;
             switch (b.type) {
                 case 'heading': {
                     const lvl = (b.level >= 1 && b.level <= 4) ? b.level : 1;
-                    return `<div class="block block-heading lvl${lvl}${active}" data-index="${i}">
+                    const toggle = o.hasChildren
+                        ? `<button class="heading-toggle" data-toggle="${i}" title="${o.collapsed ? '展开' : '收纳'}">${o.collapsed ? '▶' : '▼'}</button>`
+                        : `<span class="heading-toggle empty"></span>`;
+                    return `<div class="block block-heading lvl${lvl}${o.collapsed ? ' collapsed' : ''}${active}" data-index="${i}">
+                        ${toggle}
                         <button class="block-grip" data-grip="${i}" title="点击切换标题级别">H${lvl}</button>
                         <input class="block-input" value="${escapeHtml(b.text || '')}" placeholder="标题...">
                         ${del}</div>`;
@@ -2160,8 +2225,21 @@
                 }
             });
 
-            // 点击删除 / 勾选清单 / 标题级别 / 空占位
+            // 点击删除 / 勾选清单 / 标题级别 / 标题收纳 / 空占位
             container.addEventListener('click', e => {
+                const tgl = e.target.closest('.heading-toggle');
+                if (tgl && tgl.dataset.toggle !== undefined) {
+                    const row = tgl.closest('.block');
+                    const i = parseInt(row.dataset.index, 10);
+                    const note = getCurrentNote();
+                    if (!note) return;
+                    const b = note.content[i];
+                    b.collapsed = !b.collapsed;
+                    saveNotes();
+                    renderBlocks();
+                    focusBlockInput(i);
+                    return;
+                }
                 const grip = e.target.closest('.block-grip');
                 if (grip) {
                     const row = grip.closest('.block');
