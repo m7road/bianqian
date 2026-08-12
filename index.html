@@ -930,19 +930,38 @@
 
         .block-input::placeholder { color: var(--editor-content-placeholder); }
 
-        /* 小标题块 */
-        .block-heading { margin-top: 8px; }
+        /* 标题块（H1~H4，点左侧 H1/H2/H3/H4 徽标切换级别） */
+        .block-heading { margin-top: 6px; }
         .block-heading .block-input {
-            font-size: 16px;
             font-weight: 700;
             color: var(--editor-title);
         }
-        .block-heading .block-grip {
-            font-size: 13px;
-            color: var(--accent-color);
-            font-weight: 700;
+        .block-grip {
             flex-shrink: 0;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent-color);
+            background: var(--theme-option-hover);
+            border: none;
+            border-radius: 4px;
+            padding: 1px 4px;
+            cursor: pointer;
+            line-height: 1.5;
+            transition: all 0.15s;
         }
+        .block-grip:hover {
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        .block-heading.lvl1 { box-shadow: inset 3px 0 0 0 var(--accent-color); padding-left: 6px; }
+        .block-heading.lvl2 { box-shadow: inset 3px 0 0 0 var(--resize-handle-bar); padding-left: 26px; }
+        .block-heading.lvl3 { box-shadow: inset 3px 0 0 0 var(--char-count-border); padding-left: 46px; }
+        .block-heading.lvl4 { box-shadow: inset 3px 0 0 0 var(--char-count-border); padding-left: 66px; }
+        .block-heading.lvl1 .block-input { font-size: 19px; }
+        .block-heading.lvl2 .block-input { font-size: 17px; }
+        .block-heading.lvl3 .block-input { font-size: 15px; color: var(--editor-content); }
+        .block-heading.lvl4 .block-input { font-size: 14px; color: var(--editor-content); }
 
         /* 清单块 */
         .todo-checkbox {
@@ -1476,15 +1495,16 @@
                     id: generateId(),
                     title: '🎒 出行行李清单',
                     content: [
-                        { type: 'heading', text: '🧥 衣物类' },
+                        { type: 'heading', text: '🎒 出行行李清单', level: 1 },
+                        { type: 'heading', text: '🧥 衣物类', level: 2 },
                         { type: 'todo', checked: true, text: '换洗衣物' },
                         { type: 'todo', checked: false, text: '外套 / 卫衣' },
-                        { type: 'heading', text: '📱 电子类' },
+                        { type: 'heading', text: '📱 电子类', level: 2 },
                         { type: 'todo', checked: false, text: '手机 + 充电器' },
                         { type: 'todo', checked: false, text: '移动电源' },
                         { type: 'divider' },
                         { type: 'text', text: '🖍️ 记得带身份证！', highlight: true },
-                        { type: 'text', text: '点顶部工具按钮：H 小标题 · ☐ 清单 · ― 分隔线 · 𝐁 加粗 · 🖍️ 高亮' },
+                        { type: 'text', text: '标题左侧 H1/H2/H3/H4 可点击切换级别' },
                     ],
                     colorIdx: 0,
                     createdAt: now,
@@ -1993,11 +2013,13 @@
             const active = i === activeBlockIndex ? ' active' : '';
             const del = `<button class="block-delete" title="删除">✕</button>`;
             switch (b.type) {
-                case 'heading':
-                    return `<div class="block block-heading${active}" data-index="${i}">
-                        <span class="block-grip">H</span>
-                        <input class="block-input" value="${escapeHtml(b.text || '')}" placeholder="小标题...">
+                case 'heading': {
+                    const lvl = (b.level >= 1 && b.level <= 4) ? b.level : 1;
+                    return `<div class="block block-heading lvl${lvl}${active}" data-index="${i}">
+                        <button class="block-grip" data-grip="${i}" title="点击切换标题级别">H${lvl}</button>
+                        <input class="block-input" value="${escapeHtml(b.text || '')}" placeholder="标题...">
                         ${del}</div>`;
+                }
                 case 'todo':
                     return `<div class="block block-todo${active}${b.checked ? ' done' : ''}" data-index="${i}">
                         <input type="checkbox" class="todo-checkbox" ${b.checked ? 'checked' : ''}>
@@ -2047,13 +2069,25 @@
             const blocks = note.content;
             let i = activeBlockIndex >= 0 ? activeBlockIndex : blocks.length;
 
-            if (type === 'heading' || type === 'todo' || type === 'divider') {
+            if (type === 'heading') {
                 const cur = blocks[i];
-                if (cur && cur.type === 'text' && !cur.text) {
+                if (cur && cur.type === 'heading') {
+                    // 已是标题 → 循环切换级别 H1→H2→H3→H4→H1
+                    cur.level = ((cur.level || 1) % 4) + 1;
+                } else if (cur && cur.type === 'text' && !cur.text) {
                     // 当前是空文本行 → 直接转换
-                    blocks[i] = { type, text: '', checked: false };
+                    blocks[i] = { type: 'heading', text: '', level: 1 };
                 } else {
                     // 在当前行之后插入新块
+                    blocks.splice(i + 1, 0, { type: 'heading', text: '', level: 1 });
+                    i = i + 1;
+                }
+                activeBlockIndex = i;
+            } else if (type === 'todo' || type === 'divider') {
+                const cur = blocks[i];
+                if (cur && cur.type === 'text' && !cur.text) {
+                    blocks[i] = { type, text: '', checked: false };
+                } else {
                     blocks.splice(i + 1, 0, { type, text: '', checked: false });
                     i = i + 1;
                 }
@@ -2126,8 +2160,21 @@
                 }
             });
 
-            // 点击删除 / 勾选清单 / 空占位
+            // 点击删除 / 勾选清单 / 标题级别 / 空占位
             container.addEventListener('click', e => {
+                const grip = e.target.closest('.block-grip');
+                if (grip) {
+                    const row = grip.closest('.block');
+                    const i = parseInt(row.dataset.index, 10);
+                    const note = getCurrentNote();
+                    if (!note) return;
+                    const b = note.content[i];
+                    b.level = ((b.level || 1) % 4) + 1;
+                    renderBlocks();
+                    focusBlockInput(i);
+                    onBlocksChanged();
+                    return;
+                }
                 const del = e.target.closest('.block-delete');
                 if (del) {
                     const row = del.closest('.block');
