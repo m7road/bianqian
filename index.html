@@ -831,21 +831,171 @@
 
         .note-title-input::placeholder { color: var(--editor-title-placeholder); }
 
-        .note-content-input {
+        /* ===== 内容工具栏 ===== */
+        .block-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 0;
+            margin-bottom: 8px;
+            border-top: 1px solid var(--char-count-border);
+            border-bottom: 1px solid var(--char-count-border);
+        }
+
+        .tb-btn {
+            width: 28px;
+            height: 26px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--header-actions-color);
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .tb-btn:hover {
+            background: var(--theme-option-hover);
+            color: var(--theme-label-active);
+        }
+
+        .tb-btn:active { transform: scale(0.92); }
+
+        .tb-sep {
+            width: 1px;
+            height: 16px;
+            background: var(--char-count-border);
+            margin: 0 4px;
+        }
+
+        .tb-hint {
+            font-size: 10px;
+            color: var(--editor-content-placeholder);
+            margin-left: 4px;
+        }
+
+        /* ===== 内容块容器 ===== */
+        .blocks {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .blocks::-webkit-scrollbar { width: 4px; }
+        .blocks::-webkit-scrollbar-track { background: transparent; }
+        .blocks::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+
+        .block-empty {
+            color: var(--editor-content-placeholder);
+            font-size: 14px;
+            padding: 8px 2px;
+            cursor: text;
+        }
+
+        /* ===== 各类内容块 ===== */
+        .block {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 6px;
+            margin: 2px -6px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            transition: all 0.15s;
+            position: relative;
+        }
+
+        .block:hover { background: var(--theme-option-hover); }
+        .block.active {
+            border-color: var(--accent-color);
+            background: var(--theme-option-hover);
+        }
+
+        .block-input {
             flex: 1;
             width: 100%;
-            padding: 0;
-            font-size: 14px;
-            line-height: 1.9;
+            min-width: 0;
+            padding: 2px 0;
             border: none;
             background: transparent;
             color: var(--editor-content);
+            font-size: 14px;
+            line-height: 1.7;
             outline: none;
-            resize: none;
             font-family: inherit;
         }
 
-        .note-content-input::placeholder { color: var(--editor-content-placeholder); }
+        .block-input::placeholder { color: var(--editor-content-placeholder); }
+
+        /* 小标题块 */
+        .block-heading { margin-top: 8px; }
+        .block-heading .block-input {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--editor-title);
+        }
+        .block-heading .block-grip {
+            font-size: 13px;
+            color: var(--accent-color);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* 清单块 */
+        .todo-checkbox {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            accent-color: var(--accent-color);
+            cursor: pointer;
+        }
+
+        .block-todo.done .block-input {
+            color: var(--item-preview);
+            text-decoration: line-through;
+        }
+
+        /* 分隔线块 */
+        .block-divider {
+            padding: 8px 6px;
+            cursor: default;
+        }
+
+        .block-divider .divider-line {
+            flex: 1;
+            height: 1px;
+            background: var(--char-count-border);
+        }
+
+        /* 加粗 / 高亮 */
+        .block-text.bold .block-input { font-weight: 700; }
+        .block-text.highlight .block-input {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        /* 删除按钮 */
+        .block-delete {
+            width: 20px;
+            height: 20px;
+            border: none;
+            border-radius: 4px;
+            background: transparent;
+            color: var(--item-date);
+            font-size: 11px;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .block:hover .block-delete { display: flex; }
+        .block-delete:hover { background: #fee2e2; color: #ef4444; }
 
         .char-count {
             text-align: right;
@@ -1052,7 +1202,16 @@
                     <select id="categorySelect" class="note-category-select" title="便签分类"></select>
                 </div>
                 <input type="text" class="note-title-input" id="titleInput" placeholder="便签标题...">
-                <textarea class="note-content-input" id="contentInput" placeholder="写点什么呢..."></textarea>
+                <div class="block-toolbar">
+                    <button class="tb-btn" id="tbHeading" title="小标题">H</button>
+                    <button class="tb-btn" id="tbTodo" title="勾选清单">☐</button>
+                    <button class="tb-btn" id="tbDivider" title="分隔线">―</button>
+                    <span class="tb-sep"></span>
+                    <button class="tb-btn" id="tbBold" title="加粗">𝐁</button>
+                    <button class="tb-btn" id="tbHighlight" title="高亮">🖍️</button>
+                    <span class="tb-hint">先点选一行，再点按钮插入</span>
+                </div>
+                <div class="blocks" id="blocksContainer"></div>
                 <div class="char-count" id="charCount"></div>
             </div>
 
@@ -1310,18 +1469,39 @@
                 try { notes = JSON.parse(raw); }
                 catch { notes = []; }
             }
+            notes.forEach(normalizeNoteContent);
             if (!notes.length) {
                 const now = new Date().toISOString();
                 notes.push({
                     id: generateId(),
-                    title: '👋 欢迎使用便签本',
-                    content: '这是一张示例便签！\n\n✨ 功能：\n- 左侧点击便签查看内容\n- 右侧直接编辑，自动保存\n- 搜索框快速查找\n- 🎨 调色盘换主题色\n- ↔ 拖拽分隔条调整宽度\n- 🌙 底部开关夜间/日间模式\n- ⏰ 支持跟随时间自动切换\n- 每张便签有不同颜色',
+                    title: '🎒 出行行李清单',
+                    content: [
+                        { type: 'heading', text: '🧥 衣物类' },
+                        { type: 'todo', checked: true, text: '换洗衣物' },
+                        { type: 'todo', checked: false, text: '外套 / 卫衣' },
+                        { type: 'heading', text: '📱 电子类' },
+                        { type: 'todo', checked: false, text: '手机 + 充电器' },
+                        { type: 'todo', checked: false, text: '移动电源' },
+                        { type: 'divider' },
+                        { type: 'text', text: '🖍️ 记得带身份证！', highlight: true },
+                        { type: 'text', text: '点顶部工具按钮：H 小标题 · ☐ 清单 · ― 分隔线 · 𝐁 加粗 · 🖍️ 高亮' },
+                    ],
                     colorIdx: 0,
                     createdAt: now,
                     updatedAt: now,
                 });
                 saveNotes();
             }
+        }
+
+        // 兼容旧数据：把纯文本内容转为内容块数组
+        function normalizeNoteContent(n) {
+            if (typeof n.content === 'string') {
+                const text = n.content;
+                n.content = text.split('\n').map(line => line.trimEnd()).filter(line => line !== '')
+                    .map(line => ({ type: 'text', text: line }));
+            }
+            if (!Array.isArray(n.content)) n.content = [];
         }
 
         function saveNotes() {
@@ -1362,7 +1542,7 @@
                 const kw = searchKeyword.trim().toLowerCase();
                 result = result.filter(n =>
                     (n.title || '').toLowerCase().includes(kw) ||
-                    (n.content || '').toLowerCase().includes(kw)
+                    contentToText(n.content).toLowerCase().includes(kw)
                 );
             }
             return result;
@@ -1388,7 +1568,7 @@
             }
 
             container.innerHTML = filtered.map(n => {
-                const preview = (n.content || '').replace(/\n/g, ' ').slice(0, 50) || '点击编辑';
+                const preview = contentToText(n.content).slice(0, 50) || '点击编辑';
                 const isActive = n.id === currentId;
                 const borderColor = getColorBorder(n.colorIdx);
                 return `
@@ -1436,13 +1616,18 @@
             dateEl.textContent = `编辑于 ${formatDate(note.updatedAt)}`;
 
             document.getElementById('titleInput').value = note.title || '';
-            document.getElementById('contentInput').value = note.content || '';
+            activeBlockIndex = -1;
             renderCategorySelect();
+            renderBlocks();
             updateCharCount();
         }
 
         function updateCharCount() {
-            const len = document.getElementById('contentInput').value.length;
+            const note = getCurrentNote();
+            let len = 0;
+            if (note && Array.isArray(note.content)) {
+                len = note.content.reduce((s, b) => s + (b.text ? b.text.length : 0), 0);
+            }
             document.getElementById('charCount').textContent = `${len} 字`;
         }
 
@@ -1460,7 +1645,7 @@
             const note = {
                 id: generateId(),
                 title: '新便签',
-                content: '',
+                content: [],
                 colorIdx: Math.floor(Math.random() * NOTE_COLORS.length),
                 categoryId: currentCategoryId || '', // 新建便签自动归入当前分类
                 createdAt: now,
@@ -1502,11 +1687,7 @@
             if (!note) return;
 
             const newTitle = document.getElementById('titleInput').value;
-            const newContent = document.getElementById('contentInput').value;
-            if (note.title === newTitle && note.content === newContent) return;
-
-            note.title = newTitle;
-            note.content = newContent;
+            if (note.title !== newTitle) note.title = newTitle;
             note.updatedAt = getNowISO();
             updateCharCount();
 
@@ -1776,6 +1957,221 @@
         }
 
         // ============================================================
+        //  内容块编辑器（多样内容：小标题/清单/分隔线/加粗/高亮）
+        // ============================================================
+        let activeBlockIndex = -1;
+
+        function getCurrentNote() {
+            if (!currentId) return null;
+            return notes.find(n => n.id === currentId) || null;
+        }
+
+        // 把内容块转成纯文本（用于预览/搜索）
+        function contentToText(content) {
+            if (typeof content === 'string') return content;
+            if (!Array.isArray(content)) return '';
+            return content.map(b => {
+                if (b.type === 'divider') return '';
+                if (b.type === 'todo') return (b.checked ? '☑ ' : '☐ ') + (b.text || '');
+                return b.text || '';
+            }).filter(s => s.trim()).join(' ');
+        }
+
+        function renderBlocks() {
+            const container = document.getElementById('blocksContainer');
+            const note = getCurrentNote();
+            if (!note) return;
+            const blocks = note.content;
+            if (!blocks.length) {
+                container.innerHTML = `<div class="block-empty">写点什么呢...</div>`;
+                return;
+            }
+            container.innerHTML = blocks.map((b, i) => renderBlock(b, i)).join('');
+        }
+
+        function renderBlock(b, i) {
+            const active = i === activeBlockIndex ? ' active' : '';
+            const del = `<button class="block-delete" title="删除">✕</button>`;
+            switch (b.type) {
+                case 'heading':
+                    return `<div class="block block-heading${active}" data-index="${i}">
+                        <span class="block-grip">H</span>
+                        <input class="block-input" value="${escapeHtml(b.text || '')}" placeholder="小标题...">
+                        ${del}</div>`;
+                case 'todo':
+                    return `<div class="block block-todo${active}${b.checked ? ' done' : ''}" data-index="${i}">
+                        <input type="checkbox" class="todo-checkbox" ${b.checked ? 'checked' : ''}>
+                        <input class="block-input" value="${escapeHtml(b.text || '')}" placeholder="待办事项...">
+                        ${del}</div>`;
+                case 'divider':
+                    return `<div class="block block-divider${active}" data-index="${i}">
+                        <div class="divider-line"></div>${del}</div>`;
+                default: {
+                    const cls = ['block', 'block-text', b.bold ? 'bold' : '', b.highlight ? 'highlight' : '', active].filter(Boolean).join(' ');
+                    return `<div class="${cls}" data-index="${i}">
+                        <input class="block-input" value="${escapeHtml(b.text || '')}" placeholder="写点什么呢...">
+                        ${del}</div>`;
+                }
+            }
+        }
+
+        function focusBlockInput(i) {
+            const inputs = document.querySelectorAll('#blocksContainer .block-input');
+            const el = inputs[i];
+            if (el) {
+                el.focus();
+                const len = el.value.length;
+                el.setSelectionRange(len, len);
+            }
+        }
+
+        function setActiveBlock(i, refocus) {
+            if (i < 0) return;
+            activeBlockIndex = i;
+            document.querySelectorAll('#blocksContainer .block').forEach((el, idx) => {
+                el.classList.toggle('active', idx === i);
+            });
+            if (refocus !== false) focusBlockInput(i);
+        }
+
+        // 内容变更：更新字数 + 防抖保存
+        function onBlocksChanged() {
+            updateCharCount();
+            handleEdit();
+        }
+
+        // 工具栏：把当前活动行转为某类型，或在当前行之后插入新块
+        function toolbarAction(type) {
+            const note = getCurrentNote();
+            if (!note) return;
+            const blocks = note.content;
+            let i = activeBlockIndex >= 0 ? activeBlockIndex : blocks.length;
+
+            if (type === 'heading' || type === 'todo' || type === 'divider') {
+                const cur = blocks[i];
+                if (cur && cur.type === 'text' && !cur.text) {
+                    // 当前是空文本行 → 直接转换
+                    blocks[i] = { type, text: '', checked: false };
+                } else {
+                    // 在当前行之后插入新块
+                    blocks.splice(i + 1, 0, { type, text: '', checked: false });
+                    i = i + 1;
+                }
+                activeBlockIndex = i;
+            } else if (type === 'bold' || type === 'highlight') {
+                const cur = blocks[i];
+                if (cur && (cur.type === 'text' || cur.type === 'heading')) {
+                    if (type === 'bold') cur.bold = !cur.bold;
+                    else cur.highlight = !cur.highlight;
+                } else {
+                    blocks.splice(i + 1, 0, { type: 'text', text: '', bold: type === 'bold', highlight: type === 'highlight' });
+                    i = i + 1;
+                    activeBlockIndex = i;
+                }
+            }
+            renderBlocks();
+            focusBlockInput(activeBlockIndex);
+            onBlocksChanged();
+        }
+
+        function initBlockEvents() {
+            const container = document.getElementById('blocksContainer');
+
+            // 点击行：设为活动行
+            container.addEventListener('mousedown', e => {
+                const row = e.target.closest('.block');
+                if (row && !e.target.closest('.block-delete') && !e.target.classList.contains('todo-checkbox')) {
+                    setActiveBlock(parseInt(row.dataset.index, 10), false);
+                }
+            });
+
+            // 输入更新块内容
+            container.addEventListener('input', e => {
+                if (!e.target.classList.contains('block-input')) return;
+                const row = e.target.closest('.block');
+                if (!row) return;
+                const note = getCurrentNote();
+                if (!note) return;
+                const i = parseInt(row.dataset.index, 10);
+                note.content[i].text = e.target.value;
+                onBlocksChanged();
+            });
+
+            // 键盘：Enter 新建下一行 / 行首 Backspace 删除空行
+            container.addEventListener('keydown', e => {
+                const row = e.target.closest('.block');
+                if (!row || !e.target.classList.contains('block-input')) return;
+                const note = getCurrentNote();
+                if (!note) return;
+                const blocks = note.content;
+                const i = parseInt(row.dataset.index, 10);
+
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    blocks.splice(i + 1, 0, { type: 'text', text: '' });
+                    activeBlockIndex = i + 1;
+                    renderBlocks();
+                    focusBlockInput(i + 1);
+                    onBlocksChanged();
+                } else if (e.key === 'Backspace' && e.target.selectionStart === 0 && e.target.selectionEnd === 0) {
+                    const cur = blocks[i];
+                    if (!cur.text && blocks.length > 1) {
+                        e.preventDefault();
+                        blocks.splice(i, 1);
+                        activeBlockIndex = Math.max(0, i - 1);
+                        renderBlocks();
+                        focusBlockInput(Math.min(activeBlockIndex, blocks.length - 1));
+                        onBlocksChanged();
+                    }
+                }
+            });
+
+            // 点击删除 / 勾选清单 / 空占位
+            container.addEventListener('click', e => {
+                const del = e.target.closest('.block-delete');
+                if (del) {
+                    const row = del.closest('.block');
+                    const i = parseInt(row.dataset.index, 10);
+                    const note = getCurrentNote();
+                    if (!note) return;
+                    note.content.splice(i, 1);
+                    activeBlockIndex = Math.min(activeBlockIndex, Math.max(note.content.length - 1, 0));
+                    renderBlocks();
+                    if (note.content.length) focusBlockInput(activeBlockIndex);
+                    onBlocksChanged();
+                    return;
+                }
+                const cb = e.target.closest('.todo-checkbox');
+                if (cb) {
+                    const row = cb.closest('.block');
+                    const i = parseInt(row.dataset.index, 10);
+                    const note = getCurrentNote();
+                    if (!note) return;
+                    note.content[i].checked = cb.checked;
+                    row.classList.toggle('done', cb.checked);
+                    onBlocksChanged();
+                    return;
+                }
+                if (e.target.classList.contains('block-empty')) {
+                    const note = getCurrentNote();
+                    if (!note) return;
+                    note.content.push({ type: 'text', text: '' });
+                    activeBlockIndex = note.content.length - 1;
+                    renderBlocks();
+                    focusBlockInput(activeBlockIndex);
+                    onBlocksChanged();
+                }
+            });
+
+            // 工具栏
+            document.getElementById('tbHeading').addEventListener('click', () => toolbarAction('heading'));
+            document.getElementById('tbTodo').addEventListener('click', () => toolbarAction('todo'));
+            document.getElementById('tbDivider').addEventListener('click', () => toolbarAction('divider'));
+            document.getElementById('tbBold').addEventListener('click', () => toolbarAction('bold'));
+            document.getElementById('tbHighlight').addEventListener('click', () => toolbarAction('highlight'));
+        }
+
+        // ============================================================
         //  侧边栏拖拽（修复版）
         // ============================================================
         let isResizing = false;
@@ -1946,13 +2342,22 @@
             });
 
             document.getElementById('titleInput').addEventListener('input', handleEdit);
-            document.getElementById('contentInput').addEventListener('input', handleEdit);
 
             document.addEventListener('keydown', handleKeydown);
 
             document.getElementById('editorArea').addEventListener('click', e => {
                 if (e.target === e.currentTarget) {
-                    document.getElementById('contentInput').focus();
+                    const note = getCurrentNote();
+                    if (!note) return;
+                    if (!note.content.length) {
+                        note.content.push({ type: 'text', text: '' });
+                        activeBlockIndex = note.content.length - 1;
+                        renderBlocks();
+                        focusBlockInput(activeBlockIndex);
+                        onBlocksChanged();
+                    } else {
+                        setActiveBlock(Math.max(0, note.content.length - 1));
+                    }
                 }
             });
 
@@ -1962,6 +2367,7 @@
 
             initResize();
             initCatEvents();
+            initBlockEvents();
             startAutoTimer();
 
             console.log('📌 便签本已启动！');
