@@ -7,9 +7,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="便签本">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="manifest" href="/bianqian/manifest.json">
-    <link rel="icon" type="image/svg+xml" href="/bianqian/icons/icon.svg">
-    <link rel="apple-touch-icon" href="/bianqian/icons/icon.svg">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon.svg">
     <title>📌 便签本</title>
     <style>
         /* ===== 重置 & 基础 ===== */
@@ -2428,7 +2428,7 @@
         // ============================================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/bianqian/sw.js').then(reg => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
                     console.log('📦 PWA: Service Worker 已注册', reg.scope);
                 }).catch(err => {
                     console.log('📦 PWA: Service Worker 注册失败', err);

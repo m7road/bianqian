@@ -1,9 +1,9 @@
-const CACHE_NAME = 'sticky-notes-v1';
+const CACHE_NAME = 'sticky-notes-v2';
 const ASSETS = [
-  '/bianqian/',
-  '/bianqian/index.html',
-  '/bianqian/manifest.json',
-  '/bianqian/icons/icon.svg'
+  './',
+  './index.html',
+  './manifest.json',
+  './icon.svg'
 ];
 
 // 安装时缓存核心文件
