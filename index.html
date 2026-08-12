@@ -437,6 +437,203 @@
         .search-box input::placeholder { color: var(--search-placeholder); }
         .search-box input:focus { border-color: var(--search-focus); }
 
+        /* ===== 分类区域 ===== */
+        .cat-box {
+            border-bottom: 1px solid var(--sidebar-border);
+            max-height: 42%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 12px 4px;
+        }
+
+        .cat-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--theme-label);
+            letter-spacing: 0.5px;
+        }
+
+        .cat-add-root {
+            width: 22px !important;
+            height: 22px !important;
+            font-size: 13px !important;
+        }
+
+        .cat-list {
+            overflow-y: auto;
+            padding: 0 6px 6px;
+        }
+
+        .cat-list::-webkit-scrollbar { width: 4px; }
+        .cat-list::-webkit-scrollbar-track { background: transparent; }
+        .cat-list::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+
+        .cat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 8px;
+            margin: 1px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--item-title);
+            transition: all 0.15s;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .cat-item:hover {
+            background: var(--theme-option-hover);
+        }
+
+        .cat-item.active {
+            background: var(--item-active-bg);
+            color: var(--item-active-title);
+            font-weight: 600;
+        }
+
+        .cat-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: 1px solid rgba(0,0,0,0.12);
+        }
+
+        .cat-arrow {
+            width: 14px;
+            flex-shrink: 0;
+            font-size: 9px;
+            color: var(--item-preview);
+            text-align: center;
+            user-select: none;
+        }
+
+        .cat-arrow.empty { visibility: hidden; }
+
+        .cat-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cat-actions {
+            display: none;
+            gap: 1px;
+            flex-shrink: 0;
+        }
+
+        .cat-item:hover .cat-actions { display: flex; }
+
+        .cat-act {
+            width: 18px;
+            height: 18px;
+            border: none;
+            border-radius: 4px;
+            background: transparent;
+            font-size: 11px;
+            cursor: pointer;
+            color: var(--header-actions-color);
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .cat-act:hover {
+            background: var(--header-actions-hover-bg);
+            color: var(--header-actions-hover-color);
+        }
+
+        /* ===== 分类颜色选择 ===== */
+        .cat-color-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .cat-color-opt {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.15s;
+        }
+
+        .cat-color-opt:hover { transform: scale(1.15); }
+
+        .cat-color-opt.active {
+            box-shadow: 0 0 0 2px var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        /* ===== 分类编辑弹窗（居中模态） ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        .modal-box {
+            background: var(--theme-popup-bg);
+            border: 1px solid var(--theme-popup-border);
+            border-radius: 14px;
+            padding: 20px;
+            width: 320px;
+            max-width: 90vw;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+        }
+
+        .modal-box h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--theme-label-active);
+            margin-bottom: 14px;
+        }
+
+        /* ===== 编辑区分类选择器 ===== */
+        .note-category-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--char-count-border);
+        }
+
+        .note-category-label { font-size: 13px; }
+
+        .note-category-select {
+            flex: 1;
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--search-border);
+            background: var(--search-bg);
+            color: var(--search-text);
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .note-category-select:focus {
+            border-color: var(--search-focus);
+        }
+
         /* ===== 笔记列表（便签卡片） ===== */
         .note-list {
             flex: 1;
@@ -813,6 +1010,15 @@
                 <input type="text" id="searchInput" placeholder="🔍 搜索便签..." autocomplete="off">
             </div>
 
+            <!-- ===== 分类区域 ===== -->
+            <div class="cat-box">
+                <div class="cat-header">
+                    <span class="cat-title">📂 分类</span>
+                    <button class="btn-icon cat-add-root" id="btnAddCategory" title="添加分类">＋</button>
+                </div>
+                <div class="cat-list" id="catList"></div>
+            </div>
+
             <div class="note-list" id="noteList"></div>
 
             <!-- ===== 底部：夜间模式切换 ===== -->
@@ -841,6 +1047,10 @@
             </div>
 
             <div id="editorArea" class="editor-area" style="display:none;">
+                <div class="note-category-row">
+                    <span class="note-category-label">📂</span>
+                    <select id="categorySelect" class="note-category-select" title="便签分类"></select>
+                </div>
                 <input type="text" class="note-title-input" id="titleInput" placeholder="便签标题...">
                 <textarea class="note-content-input" id="contentInput" placeholder="写点什么呢..."></textarea>
                 <div class="char-count" id="charCount"></div>
@@ -852,6 +1062,29 @@
                 <p>点击左侧便签查看内容</p>
             </div>
         </main>
+    </div>
+
+    <!-- ===== 分类编辑弹窗 ===== -->
+    <div class="modal-overlay" id="catModal">
+        <div class="modal-box">
+            <h4 id="catPopupTitle">添加分类</h4>
+            <div class="rename-field">
+                <label>图标（Emoji）</label>
+                <input type="text" id="catIcon" maxlength="4" placeholder="🧥">
+            </div>
+            <div class="rename-field">
+                <label>名称</label>
+                <input type="text" id="catName" placeholder="分类名称" maxlength="20">
+            </div>
+            <div class="rename-field">
+                <label>颜色</label>
+                <div class="cat-color-grid" id="catColorGrid"></div>
+            </div>
+            <div class="rename-actions">
+                <button class="rename-btn cancel" id="catCancel">取消</button>
+                <button class="rename-btn confirm" id="catConfirm">确定</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1118,12 +1351,21 @@
         }
 
         function getFilteredNotes() {
-            if (!searchKeyword.trim()) return notes;
-            const kw = searchKeyword.trim().toLowerCase();
-            return notes.filter(n =>
-                (n.title || '').toLowerCase().includes(kw) ||
-                (n.content || '').toLowerCase().includes(kw)
-            );
+            let result = notes;
+            // 分类过滤：显示所选分类及其所有子分类下的便签
+            if (currentCategoryId) {
+                const ids = collectCategoryIds(currentCategoryId, categories);
+                result = result.filter(n => ids.includes(n.categoryId));
+            }
+            // 关键词过滤
+            if (searchKeyword.trim()) {
+                const kw = searchKeyword.trim().toLowerCase();
+                result = result.filter(n =>
+                    (n.title || '').toLowerCase().includes(kw) ||
+                    (n.content || '').toLowerCase().includes(kw)
+                );
+            }
+            return result;
         }
 
         function renderList() {
@@ -1131,11 +1373,15 @@
             const filtered = getFilteredNotes();
 
             if (!filtered.length) {
+                const noMatch = searchKeyword.trim();
+                const icon = noMatch ? '🔍' : (currentCategoryId ? '🗂️' : '📋');
+                const title = noMatch ? '没有找到' : (currentCategoryId ? '此分类暂无便签' : '暂无便签');
+                const desc = noMatch ? '试试其他关键词' : '点击 + 新建一张';
                 container.innerHTML = `
                     <div class="empty-state">
-                        <div class="icon">${searchKeyword ? '🔍' : '📋'}</div>
-                        <h3>${searchKeyword ? '没有找到' : '暂无便签'}</h3>
-                        <p>${searchKeyword ? '试试其他关键词' : '点击 + 新建一张'}</p>
+                        <div class="icon">${icon}</div>
+                        <h3>${title}</h3>
+                        <p>${desc}</p>
                     </div>
                 `;
                 return;
@@ -1191,6 +1437,7 @@
 
             document.getElementById('titleInput').value = note.title || '';
             document.getElementById('contentInput').value = note.content || '';
+            renderCategorySelect();
             updateCharCount();
         }
 
@@ -1215,6 +1462,7 @@
                 title: '新便签',
                 content: '',
                 colorIdx: Math.floor(Math.random() * NOTE_COLORS.length),
+                categoryId: currentCategoryId || '', // 新建便签自动归入当前分类
                 createdAt: now,
                 updatedAt: now,
             };
@@ -1281,6 +1529,250 @@
                 currentId = filtered.length ? filtered[0].id : null;
             }
             render();
+        }
+
+        // ============================================================
+        //  分类系统（多级树）
+        // ============================================================
+        const CATEGORY_STORAGE_KEY = 'sticky_notes_categories';
+        const CATEGORY_COLORS = ['#f59e0b', '#ef4444', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#14b8a6', '#6b7280'];
+
+        let categories = [];
+        let currentCategoryId = null; // null = 全部
+        const collapsedCats = new Set(); // 折叠的分类 id
+
+        function loadCategories() {
+            const raw = localStorage.getItem(CATEGORY_STORAGE_KEY);
+            if (raw) {
+                try { categories = JSON.parse(raw); }
+                catch { categories = []; }
+            }
+            (function normalize(list) {
+                for (const c of list) {
+                    if (!Array.isArray(c.children)) c.children = [];
+                    normalize(c.children);
+                }
+            })(categories);
+        }
+
+        function saveCategories() {
+            localStorage.setItem(CATEGORY_STORAGE_KEY, JSON.stringify(categories));
+        }
+
+        function findCategory(id, list = categories) {
+            for (const c of list) {
+                if (c.id === id) return c;
+                const found = findCategory(id, c.children);
+                if (found) return found;
+            }
+            return null;
+        }
+
+        // 收集某个分类及其所有后代分类的 id
+        function collectCategoryIds(id, list, out = []) {
+            for (const c of list) {
+                if (c.id === id) {
+                    out.push(c.id);
+                    (function collect(nodes) {
+                        for (const n of nodes) { out.push(n.id); collect(n.children || []); }
+                    })(c.children || []);
+                    return out;
+                }
+                collectCategoryIds(id, c.children || [], out);
+            }
+            return out;
+        }
+
+        function renderCatTree() {
+            const container = document.getElementById('catList');
+            if (!container) return;
+            let html = `
+                <div class="cat-item ${currentCategoryId === null ? 'active' : ''}" data-cat="">
+                    <span class="cat-arrow empty"></span>
+                    <span class="cat-dot" style="background:var(--accent-color)"></span>
+                    <span class="cat-name">📁 全部便签</span>
+                </div>`;
+            html += renderCatNodes(categories, 0);
+            container.innerHTML = html;
+        }
+
+        function renderCatNodes(list, level) {
+            let html = '';
+            for (const c of list) {
+                const hasChildren = c.children && c.children.length;
+                const collapsed = collapsedCats.has(c.id);
+                const active = c.id === currentCategoryId;
+                const arrow = hasChildren ? (collapsed ? '▶' : '▼') : '';
+                const icon = c.icon ? c.icon + ' ' : '';
+                html += `
+                    <div class="cat-item ${active ? 'active' : ''}"
+                         data-cat="${c.id}"
+                         style="padding-left:${level * 16 + 8}px">
+                        <span class="cat-arrow ${hasChildren ? '' : 'empty'}" data-arrow="${c.id}">${arrow}</span>
+                        <span class="cat-dot" style="background:${c.color || '#a8a29e'}"></span>
+                        <span class="cat-name">${icon}${escapeHtml(c.name || '未命名')}</span>
+                        <span class="cat-actions">
+                            <button class="cat-act" data-act="add" data-id="${c.id}" title="添加子分类">＋</button>
+                            <button class="cat-act" data-act="edit" data-id="${c.id}" title="编辑">✏️</button>
+                            <button class="cat-act" data-act="del" data-id="${c.id}" title="删除">🗑</button>
+                        </span>
+                    </div>`;
+                if (hasChildren && !collapsed) {
+                    html += renderCatNodes(c.children, level + 1);
+                }
+            }
+            return html;
+        }
+
+        // 编辑区分类下拉（带层级缩进）
+        function renderCategorySelect() {
+            const sel = document.getElementById('categorySelect');
+            if (!sel) return;
+            let html = `<option value="">📂 未分类</option>`;
+            (function walk(list, depth) {
+                for (const c of list) {
+                    const indent = depth ? '　'.repeat(depth) : '';
+                    html += `<option value="${c.id}">${indent}${c.icon || '📁'} ${escapeHtml(c.name || '未命名')}</option>`;
+                    walk(c.children || [], depth + 1);
+                }
+            })(categories, 0);
+            sel.innerHTML = html;
+            const note = notes.find(n => n.id === currentId);
+            sel.value = note && note.categoryId ? note.categoryId : '';
+        }
+
+        // ===== 分类增删改 =====
+        let editingCatId = null;
+        let editingCatParentId = null;
+
+        function openCatModal(parentId, cat) {
+            editingCatId = cat ? cat.id : null;
+            editingCatParentId = parentId;
+            document.getElementById('catPopupTitle').textContent = cat ? '编辑分类' : '添加分类';
+            document.getElementById('catIcon').value = cat ? (cat.icon || '') : '📁';
+            document.getElementById('catName').value = cat ? (cat.name || '') : '';
+            renderCatColorGrid(cat ? cat.color : '');
+            document.getElementById('catModal').classList.add('show');
+            setTimeout(() => document.getElementById('catName').focus(), 80);
+        }
+
+        function closeCatModal() {
+            document.getElementById('catModal').classList.remove('show');
+        }
+
+        function renderCatColorGrid(selected) {
+            const grid = document.getElementById('catColorGrid');
+            grid.innerHTML = CATEGORY_COLORS.map(color =>
+                `<div class="cat-color-opt ${color === selected ? 'active' : ''}" data-color="${color}" style="background:${color}"></div>`
+            ).join('');
+        }
+
+        function confirmCat() {
+            let name = document.getElementById('catName').value.trim();
+            let icon = document.getElementById('catIcon').value.trim();
+            if (!name) { alert('请输入分类名称'); return; }
+            icon = [...icon][0] || '';
+            const activeColor = document.querySelector('#catColorGrid .cat-color-opt.active');
+            const color = activeColor ? activeColor.dataset.color : CATEGORY_COLORS[0];
+
+            if (editingCatId) {
+                const cat = findCategory(editingCatId);
+                if (cat) { cat.name = name; cat.icon = icon; cat.color = color; }
+            } else {
+                const newCat = { id: generateId(), name, icon, color, children: [] };
+                if (editingCatParentId) {
+                    const parent = findCategory(editingCatParentId);
+                    if (parent) parent.children.push(newCat);
+                } else {
+                    categories.push(newCat);
+                }
+            }
+            saveCategories();
+            renderCatTree();
+            renderCategorySelect();
+            closeCatModal();
+        }
+
+        function deleteCategory(id) {
+            const cat = findCategory(id);
+            if (!cat) return;
+            const ids = collectCategoryIds(id, categories);
+            if (!confirm(`删除分类「${cat.name}」？\n该分类及其子分类下的便签会变为「未分类」。`)) return;
+
+            (function removeFrom(list) {
+                for (let i = 0; i < list.length; i++) {
+                    if (list[i].id === id) { list.splice(i, 1); return; }
+                    removeFrom(list[i].children || []);
+                }
+            })(categories);
+
+            notes.forEach(n => { if (ids.includes(n.categoryId)) n.categoryId = ''; });
+            if (currentCategoryId && ids.includes(currentCategoryId)) currentCategoryId = null;
+            saveCategories();
+            saveNotes();
+            renderCatTree();
+            renderCategorySelect();
+            render();
+        }
+
+        function toggleCatCollapse(id) {
+            if (collapsedCats.has(id)) collapsedCats.delete(id);
+            else collapsedCats.add(id);
+            renderCatTree();
+        }
+
+        // ===== 分类事件 =====
+        function initCatEvents() {
+            document.getElementById('btnAddCategory').addEventListener('click', e => {
+                e.stopPropagation();
+                openCatModal(null, null);
+            });
+
+            document.getElementById('catList').addEventListener('click', e => {
+                const act = e.target.closest('.cat-act');
+                if (act) {
+                    const id = act.dataset.id;
+                    if (act.dataset.act === 'add') openCatModal(id, null);
+                    else if (act.dataset.act === 'edit') openCatModal(null, findCategory(id));
+                    else if (act.dataset.act === 'del') deleteCategory(id);
+                    return;
+                }
+                const arrow = e.target.closest('.cat-arrow');
+                if (arrow && arrow.dataset.arrow) {
+                    toggleCatCollapse(arrow.dataset.arrow);
+                    return;
+                }
+                const item = e.target.closest('.cat-item');
+                if (item) {
+                    currentCategoryId = item.dataset.cat === '' ? null : item.dataset.cat;
+                    renderCatTree();
+                    render();
+                }
+            });
+
+            document.getElementById('catConfirm').addEventListener('click', confirmCat);
+            document.getElementById('catCancel').addEventListener('click', closeCatModal);
+            document.getElementById('catName').addEventListener('keydown', e => {
+                if (e.key === 'Enter') confirmCat();
+            });
+            document.getElementById('catColorGrid').addEventListener('click', e => {
+                const opt = e.target.closest('.cat-color-opt');
+                if (!opt) return;
+                document.querySelectorAll('#catColorGrid .cat-color-opt').forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+            });
+
+            // 当前便签更换分类
+            document.getElementById('categorySelect').addEventListener('change', e => {
+                if (!currentId) return;
+                const note = notes.find(n => n.id === currentId);
+                if (!note) return;
+                note.categoryId = e.target.value;
+                note.updatedAt = getNowISO();
+                saveNotes();
+                renderCatTree();
+                renderList();
+            });
         }
 
         // ============================================================
@@ -1368,6 +1860,11 @@
                 addNote();
             }
             if (e.key === 'Escape') {
+                const cm = document.getElementById('catModal');
+                if (cm.classList.contains('show')) {
+                    closeCatModal();
+                    return;
+                }
                 const rp = document.getElementById('renamePopup');
                 if (rp.classList.contains('show')) {
                     closeRenamePopup();
@@ -1387,11 +1884,14 @@
             loadTheme();
             loadDarkMode();
             loadNotes();
+            loadCategories();
             currentId = notes.length ? notes[0].id : null;
             loadSidebarWidth();
             loadRename();
             render();
             renderThemeGrid();
+            renderCatTree();
+            renderCategorySelect();
 
             document.getElementById('btnAdd').addEventListener('click', addNote);
 
@@ -1461,6 +1961,7 @@
             document.getElementById('autoBadge').addEventListener('click', toggleAutoMode);
 
             initResize();
+            initCatEvents();
             startAutoTimer();
 
             console.log('📌 便签本已启动！');
