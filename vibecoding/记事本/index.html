@@ -779,6 +779,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            position: relative;
+            z-index: 100;
         }
 
         .main-header h2 {
@@ -790,6 +792,68 @@
         .main-header .meta {
             font-size: 11px;
             color: var(--main-header-meta);
+        }
+
+        /* ===== 导出按钮与菜单 ===== */
+        .main-header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .btn-export {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: var(--header-actions-color);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .btn-export:hover {
+            background: var(--header-actions-hover-bg);
+            color: var(--header-actions-hover-color);
+        }
+
+        .export-popup {
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            background: var(--theme-popup-bg);
+            border: 1px solid var(--theme-popup-border);
+            border-radius: 10px;
+            padding: 6px;
+            box-shadow: 0 6px 24px var(--theme-popup-shadow);
+            display: none;
+            z-index: 999;
+            min-width: 168px;
+        }
+
+        .export-popup.show { display: block; }
+
+        .export-opt {
+            display: block;
+            width: 100%;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--theme-label-active);
+            font-size: 13px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .export-opt:hover {
+            background: var(--theme-option-hover);
         }
 
         /* ===== 便签编辑区 ===== */
@@ -1240,7 +1304,14 @@
         <main class="main">
             <div class="main-header">
                 <h2 id="displayTitle">📌 便签本</h2>
-                <span class="meta" id="displayDate"></span>
+                <div class="main-header-right">
+                    <span class="meta" id="displayDate"></span>
+                    <button class="btn-export" id="btnExport" title="导出便签">📤</button>
+                    <div class="export-popup" id="exportPopup">
+                        <button class="export-opt" data-fmt="md">📄 Markdown 文本</button>
+                        <button class="export-opt" data-fmt="pdf">🖨 PDF 打印</button>
+                    </div>
+                </div>
             </div>
 
             <div id="editorArea" class="editor-area" style="display:none;">
@@ -2297,6 +2368,158 @@
         }
 
         // ============================================================
+        //  便签导出（Markdown / PDF）
+        // ============================================================
+        function noteToMarkdown(note) {
+            const lines = [];
+            if (note.title) lines.push(`# ${note.title}`, '');
+            (note.content || []).forEach(b => {
+                switch (b.type) {
+                    case 'heading': {
+                        const lvl = Math.min((b.level || 1), 4);
+                        lines.push(`${'#'.repeat(lvl)} ${b.text || ''}`);
+                        break;
+                    }
+                    case 'todo':
+                        lines.push(`- [${b.checked ? 'x' : ' '}] ${b.text || ''}`);
+                        break;
+                    case 'divider':
+                        lines.push('---');
+                        break;
+                    case 'text': {
+                        let t = b.text || '';
+                        if (b.bold || b.highlight) t = `**${t}**`;
+                        lines.push(t);
+                        break;
+                    }
+                    default:
+                        lines.push(b.text || '');
+                }
+            });
+            return lines.join('\n');
+        }
+
+        function sanitizeFilename(name) {
+            return (name || '便签').replace(/[\\/:*?"<>|]/g, '_').slice(0, 60);
+        }
+
+        function downloadFile(filename, content, mime) {
+            const blob = new Blob([content], { type: mime + ';charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function buildPrintHtml(note) {
+            const cat = note.categoryId ? findCategory(note.categoryId) : null;
+            const catHtml = cat ? `<div class="p-cat">📂 ${escapeHtml(cat.icon || '')} ${escapeHtml(cat.name || '')}</div>` : '';
+            const blocks = (note.content || []).map(b => {
+                switch (b.type) {
+                    case 'heading': {
+                        const lvl = Math.min((b.level || 1), 4);
+                        return `<div class="p-h p-h${lvl}">${escapeHtml(b.text || '')}</div>`;
+                    }
+                    case 'todo':
+                        return `<div class="p-todo${b.checked ? ' done' : ''}">${b.checked ? '☑' : '☐'} ${escapeHtml(b.text || '')}</div>`;
+                    case 'divider':
+                        return `<div class="p-divider"></div>`;
+                    case 'text': {
+                        let t = escapeHtml(b.text || '');
+                        if (b.highlight) t = `<span class="p-hl">${t}</span>`;
+                        else if (b.bold) t = `<b>${t}</b>`;
+                        return `<div class="p-text">${t}</div>`;
+                    }
+                    default:
+                        return `<div class="p-text">${escapeHtml(b.text || '')}</div>`;
+                }
+            }).join('');
+            const date = note.updatedAt ? formatDate(note.updatedAt) : '';
+            return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>${escapeHtml(note.title || '便签')}</title>
+<style>
+    body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; color: #333; max-width: 720px; margin: 32px auto; padding: 0 24px; }
+    .p-title { font-size: 26px; margin: 0 0 4px; }
+    .p-cat { font-size: 13px; color: #888; margin-bottom: 4px; }
+    .p-date { font-size: 12px; color: #aaa; border-bottom: 1px solid #eee; padding-bottom: 12px; margin-bottom: 16px; }
+    .p-h { font-weight: 700; margin: 14px 0 6px; }
+    .p-h1 { font-size: 22px; }
+    .p-h2 { font-size: 19px; padding-left: 10px; }
+    .p-h3 { font-size: 16px; padding-left: 20px; }
+    .p-h4 { font-size: 15px; padding-left: 30px; }
+    .p-text { font-size: 14px; line-height: 1.9; margin: 4px 0; }
+    .p-todo { font-size: 14px; line-height: 1.9; margin: 4px 0; }
+    .p-todo.done { color: #aaa; text-decoration: line-through; }
+    .p-hl { color: #e11d48; font-weight: 600; }
+    .p-divider { border-top: 1px solid #ddd; margin: 14px 0; }
+    @media print { body { margin: 0; } }
+</style>
+</head>
+<body>
+<h1 class="p-title">${escapeHtml(note.title || '无标题')}</h1>
+${catHtml}
+<div class="p-date">编辑于 ${date}</div>
+${blocks}
+</body>
+</html>`;
+        }
+
+        function exportNotePdf(note) {
+            const html = buildPrintHtml(note);
+            const win = window.open('', '_blank');
+            if (!win) { alert('浏览器拦截了弹窗，请允许弹出窗口后重试'); return; }
+            win.document.write(html);
+            win.document.close();
+            win.focus();
+            setTimeout(() => win.print(), 300);
+        }
+
+        function exportNote(format) {
+            const note = getCurrentNote();
+            if (!note) return;
+            closeExportPopup();
+            if (format === 'md') {
+                const md = noteToMarkdown(note);
+                downloadFile(sanitizeFilename(note.title) + '.md', md, 'text/markdown');
+            } else if (format === 'pdf') {
+                exportNotePdf(note);
+            }
+        }
+
+        function toggleExportPopup() {
+            document.getElementById('exportPopup').classList.toggle('show');
+        }
+
+        function closeExportPopup() {
+            document.getElementById('exportPopup').classList.remove('show');
+        }
+
+        function initExportEvents() {
+            document.getElementById('btnExport').addEventListener('click', e => {
+                e.stopPropagation();
+                toggleExportPopup();
+            });
+            document.getElementById('exportPopup').addEventListener('click', e => {
+                const opt = e.target.closest('.export-opt');
+                if (opt) exportNote(opt.dataset.fmt);
+            });
+            document.addEventListener('click', e => {
+                const popup = document.getElementById('exportPopup');
+                const btn = document.getElementById('btnExport');
+                if (popup.classList.contains('show') && !popup.contains(e.target) && !btn.contains(e.target)) {
+                    closeExportPopup();
+                }
+            });
+        }
+
+        // ============================================================
         //  侧边栏拖拽（修复版）
         // ============================================================
         let isResizing = false;
@@ -2392,6 +2615,7 @@
                     return;
                 }
                 closeThemePopup();
+                closeExportPopup();
                 if (currentId) { currentId = null; render(); }
             }
         }
@@ -2493,6 +2717,7 @@
             initResize();
             initCatEvents();
             initBlockEvents();
+            initExportEvents();
             startAutoTimer();
 
             console.log('📌 便签本已启动！');
